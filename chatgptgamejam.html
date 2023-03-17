@@ -3,56 +3,190 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arrow Keys Game</title>
+  <title>Snake Game</title>
   <style>
     canvas {
       display: block;
       margin: 0 auto;
       background-color: #f0f0f0;
     }
+    #play-again {
+      display: none;
+      margin: 10px auto;
+      font-size: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="640" height="480"></canvas>
+  <button id="play-again">Play Again</button>
   <script>
-    
+ 
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const playAgainButton = document.getElementById('play-again');
 
-const playerSize = 20;
-const playerSpeed = 5;
-let playerX = canvas.width / 2 - playerSize / 2;
-let playerY = canvas.height / 2 - playerSize / 2;
+const gridSize = 20;
+const playerSize = gridSize;
+const powerCircleSize = gridSize;
+const treeSize = gridSize / 2;
+const maxPowerCircles = 10;
+const initialSpeed = 200;
+const speedIncreaseFactor = 0.9;
+
+let player = [
+  { x: gridSize * 5, y: gridSize * 5 },
+];
+let dx = gridSize;
+let dy = 0;
+let powerCircles = [];
+let trees = [];
+let gameSpeed = initialSpeed;
+let gameInterval;
+let gameOver = false;
 
 function drawPlayer() {
   ctx.fillStyle = 'blue';
-  ctx.fillRect(playerX, playerY, playerSize, playerSize);
+  for (const segment of player) {
+    ctx.fillRect(segment.x, segment.y, playerSize, playerSize);
+  }
+}
+
+function drawPowerCircles() {
+  for (const circle of powerCircles) {
+    ctx.fillStyle = circle.color;
+    ctx.beginPath();
+    ctx.arc(circle.x, circle.y, powerCircleSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawTrees() {
+  ctx.fillStyle = 'green';
+  for (const tree of trees) {
+    ctx.fillRect(tree.x, tree.y, treeSize, treeSize);
+  }
+}
+
+function updatePowerCircles() {
+  while (powerCircles.length < maxPowerCircles) {
+    const x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
+    const y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
+
+    if (!player.some(segment => segment.x === x && segment.y === y)) {
+      const color = Math.random() < 0.5 ? 'pink' : 'yellow';
+      powerCircles.push({ x: x + powerCircleSize / 2, y: y + powerCircleSize / 2, color });
+    }
+  }
+}
+
+
+function updateTrees() {
+  if (trees.length === 0) {
+    for (let i = 0; i < 5; i++) {
+      const x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
+      const y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
+
+      if (!player.some(segment => segment.x === x && segment.y === y)) {
+        trees.push({ x: x + treeSize / 2, y: y + treeSize / 2 });
+      }
+    }
+  }
+}
+
+function checkCollision(x, y, objects) {
+  return objects.some(obj => Math.abs(obj.x - x) < gridSize / 2 && Math.abs(obj.y - y) < gridSize / 2);
+}
+
+function update() {
+  if (gameOver) return;
+
+  const newX = player[0].x + dx;
+  const newY = player[0].y + dy;
+
+  if (
+    newX < 0 || newY < 0 || newX >= canvas.width || newY >= canvas.height ||
+    player.slice(1).some(segment => segment.x === newX && segment.y === newY) ||
+    checkCollision(newX + gridSize / 2, newY + gridSize / 2, trees)
+  ) {
+    gameOver = true;
+    clearInterval(gameInterval);
+    ctx.font = '40px Arial';
+    ctx.fillStyle = 'red';
+    ctx.fillText('Game Over!', canvas.width / 2 - 100, canvas.height / 2);
+    playAgainButton.style.display = 'block';
+    return;
+  }
+
+  player.unshift({ x: newX, y: newY });
+
+  if (checkCollision(newX + gridSize / 2, newY + gridSize / 2, powerCircles)) {
+    powerCircles = powerCircles.filter(circle => Math.abs(circle.x - (newX + gridSize / 2)) >= gridSize / 2 || Math.abs(circle.y - (newY + gridSize / 2)) >= gridSize / 2);
+    gameSpeed *= speedIncreaseFactor;
+    clearInterval(gameInterval);
+    gameInterval = setInterval(update, gameSpeed);
+  } else {
+    player.pop();
+  }
+
+  updatePowerCircles();
+  updateTrees();
+  clearCanvas();
+  drawPlayer();
+  drawPowerCircles();
+  drawTrees();
 }
 
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function update() {
-  clearCanvas();
-  drawPlayer();
-}
-
 function movePlayer(e) {
-  if (e.key === 'ArrowUp' && playerY > 0) {
-    playerY -= playerSpeed;
-  } else if (e.key === 'ArrowDown' && playerY < canvas.height - playerSize) {
-    playerY += playerSpeed;
-  } else if (e.key === 'ArrowLeft' && playerX > 0) {
-    playerX -= playerSpeed;
-  } else if (e.key === 'ArrowRight' && playerX < canvas.width - playerSize) {
-    playerX += playerSpeed;
+  if (gameOver) return;
+
+  if (e.key === 'ArrowUp' && dy === 0) {
+    dx = 0;
+    dy = -gridSize;
+  } else if (e.key === 'ArrowDown' && dy === 0) {
+    dx = 0;
+    dy = gridSize;
+  } else if (e.key === 'ArrowLeft' && dx === 0) {
+    dx = -gridSize;
+    dy = 0;
+  } else if (e.key === 'ArrowRight' && dx === 0) {
+    dx = gridSize;
+    dy = 0;
   }
 }
 
+function startGame() {
+  player = [
+    { x: gridSize * 5, y: gridSize * 5 },
+  ];
+  dx = gridSize;
+  dy = 0;
+  powerCircles = [];
+  trees = [];
+  gameSpeed = initialSpeed;
+  gameOver = false;
+
+  playAgainButton.style.display = 'none';
+  clearInterval(gameInterval);
+  gameInterval = setInterval(update, gameSpeed);
+}
+
 document.addEventListener('keydown', movePlayer);
-setInterval(update, 1000 / 60);
+playAgainButton.addEventListener('click', startGame);
+playAgainButton.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    startGame();
+  }
+});
+
+startGame();
+
 
 
   </script>

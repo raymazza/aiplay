@@ -106,19 +106,26 @@ function update() {
   const newX = player[0].x + dx;
   const newY = player[0].y + dy;
 
-  if (
-    newX < 0 || newY < 0 || newX >= canvas.width || newY >= canvas.height ||
-    player.slice(1).some(segment => segment.x === newX && segment.y === newY) ||
-    checkCollision(newX + gridSize / 2, newY + gridSize / 2, trees)
-  ) {
-    gameOver = true;
-    clearInterval(gameInterval);
-    ctx.font = '40px Arial';
-    ctx.fillStyle = 'red';
-    ctx.fillText('Game Over!', canvas.width / 2 - 100, canvas.height / 2);
-    playAgainButton.style.display = 'block';
-    return;
-  }
+if (
+  newX < 0 || newY < 0 || newX >= canvas.width || newY >= canvas.height ||
+  player.slice(1).some(segment => segment.x === newX && segment.y === newY) ||
+  checkCollision(newX + gridSize / 2, newY + gridSize / 2, trees)
+) {
+  gameOver = true;
+  clearInterval(gameInterval);
+  ctx.font = '40px Arial';
+  ctx.fillStyle = 'red';
+  ctx.fillText('Game Over!', canvas.width / 2 - 100, canvas.height / 2);
+
+  const score = player.length;
+  ctx.font = '30px Arial';
+  ctx.fillStyle = 'black';
+  ctx.fillText(`Score: ${score}`, canvas.width / 2 - 50, canvas.height / 2 + 50);
+
+  playAgainButton.style.display = 'block';
+  return;
+}
+
 
   player.unshift({ x: newX, y: newY });
 

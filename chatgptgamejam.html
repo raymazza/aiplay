@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arrow Keys Game</title>
+  <style>
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="640" height="480"></canvas>
+  <script>
+    
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const playerSize = 20;
+const playerSpeed = 5;
+let playerX = canvas.width / 2 - playerSize / 2;
+let playerY = canvas.height / 2 - playerSize / 2;
+
+function drawPlayer() {
+  ctx.fillStyle = 'blue';
+  ctx.fillRect(playerX, playerY, playerSize, playerSize);
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function update() {
+  clearCanvas();
+  drawPlayer();
+}
+
+function movePlayer(e) {
+  if (e.key === 'ArrowUp' && playerY > 0) {
+    playerY -= playerSpeed;
+  } else if (e.key === 'ArrowDown' && playerY < canvas.height - playerSize) {
+    playerY += playerSpeed;
+  } else if (e.key === 'ArrowLeft' && playerX > 0) {
+    playerX -= playerSpeed;
+  } else if (e.key === 'ArrowRight' && playerX < canvas.width - playerSize) {
+    playerX += playerSpeed;
+  }
+}
+
+document.addEventListener('keydown', movePlayer);
+setInterval(update, 1000 / 60);
+
+
+  </script>
+</body>
+</html>

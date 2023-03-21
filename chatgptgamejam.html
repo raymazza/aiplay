@@ -35,6 +35,8 @@ const treeSize = gridSize / 2;
 const maxPowerCircles = 10;
 const initialSpeed = 200;
 const speedIncreaseFactor = 0.9;
+const flashInterval = 50;
+const numTrees = 5;
 
 let player = [
   { x: gridSize * 5, y: gridSize * 5 },
@@ -45,7 +47,26 @@ let powerCircles = [];
 let trees = [];
 let gameSpeed = initialSpeed;
 let gameInterval;
-let gameOver = false;
+let isGameOver = false;
+let elapsedTime = 0;
+let lastPowerCircleTime = -10000;
+let consecutivePowerCircles = 0;
+
+
+function generateRandomTrees(numberOfTrees) {
+  const treeArray = [];
+
+  for (let i = 0; i < numberOfTrees; i++) {
+    const x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
+    const y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
+
+    treeArray.push({ x: x + gridSize / 2, y: y + gridSize / 2 }); // Store center coordinates
+  }
+
+  return treeArray;
+}
+
+
 
 function drawPlayer() {
   ctx.fillStyle = 'blue';
@@ -56,19 +77,51 @@ function drawPlayer() {
 
 function drawPowerCircles() {
   for (const circle of powerCircles) {
-    ctx.fillStyle = circle.color;
+    ctx.fillStyle = elapsedTime % 500 < 250 ? 'magenta' : 'cyan';
     ctx.beginPath();
     ctx.arc(circle.x, circle.y, powerCircleSize / 2, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
-function drawTrees() {
-  ctx.fillStyle = 'green';
-  for (const tree of trees) {
-    ctx.fillRect(tree.x, tree.y, treeSize, treeSize);
+function flashPowerCircles() {
+  elapsedTime += flashInterval;
+  if (elapsedTime > Number.MAX_SAFE_INTEGER - flashInterval) {
+    elapsedTime = 0;
   }
 }
+
+
+
+function drawTrees() {
+  ctx.fillStyle = 'darkgreen';
+  trees.forEach(tree => {
+    drawTree(tree.x, tree.y);
+  });
+}
+
+function drawTree(centerX, centerY) {
+  const treeWidth = gridSize / 2;
+  const treeHeight = gridSize * 1.5;
+
+  const x = centerX - treeWidth / 2;
+  const y = centerY - treeHeight / 2;
+
+  // Draw trunk
+  ctx.fillStyle = 'saddlebrown';
+  ctx.fillRect(x + treeWidth / 3, y + treeHeight * 2 / 3, treeWidth / 3, treeHeight / 3);
+
+  // Draw leaves
+  ctx.fillStyle = 'darkgreen';
+  ctx.fillRect(x, y, treeWidth, treeHeight / 3);
+  ctx.fillRect(x - treeWidth / 2, y + treeHeight / 6, treeWidth, treeHeight / 3);
+  ctx.fillRect(x + treeWidth / 2, y + treeHeight / 6, treeWidth, treeHeight / 3);
+}
+
+
+
+
+
 
 function updatePowerCircles() {
   while (powerCircles.length < maxPowerCircles) {
@@ -83,53 +136,59 @@ function updatePowerCircles() {
 }
 
 
-function updateTrees() {
-  if (trees.length === 0) {
-    for (let i = 0; i < 5; i++) {
-      const x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
-      const y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
-
-      if (!player.some(segment => segment.x === x && segment.y === y)) {
-        trees.push({ x: x + treeSize / 2, y: y + treeSize / 2 });
-      }
-    }
-  }
-}
-
 function checkCollision(x, y, objects) {
   return objects.some(obj => Math.abs(obj.x - x) < gridSize / 2 && Math.abs(obj.y - y) < gridSize / 2);
 }
 
-function update() {
-  if (gameOver) return;
+//---------------//
+//  MAIN UPDATE  //
+//---------------//
+function update()
+{
+  if (isGameOver) return;
+
+  flashPowerCircles();
 
   const newX = player[0].x + dx;
   const newY = player[0].y + dy;
 
-if (
-  newX < 0 || newY < 0 || newX >= canvas.width || newY >= canvas.height ||
-  player.slice(1).some(segment => segment.x === newX && segment.y === newY) ||
-  checkCollision(newX + gridSize / 2, newY + gridSize / 2, trees)
-) {
-  gameOver = true;
-  clearInterval(gameInterval);
-  ctx.font = '40px Arial';
-  ctx.fillStyle = 'red';
-  ctx.fillText('Game Over!', canvas.width / 2 - 100, canvas.height / 2);
+  // Check for collisions with the snake's body
+  if (checkCollision(newX, newY, player.slice(1))) {
+    gameOver();
+    return;
+  }
 
-  const score = player.length;
-  ctx.font = '30px Arial';
-  ctx.fillStyle = 'black';
-  ctx.fillText(`Score: ${score}`, canvas.width / 2 - 50, canvas.height / 2 + 50);
+  // Check for collisions with the edges of the board
+  if (newX < 0 || newX >= canvas.width || newY < 0 || newY >= canvas.height) {
+    gameOver();
+    return;
+  }
 
-  playAgainButton.style.display = 'block';
-  return;
-}
-
+  // Check for collisions with trees
+  if (checkCollision(newX + gridSize / 2, newY + gridSize / 2, trees)) {
+    gameOver();
+    return;
+  }
 
   player.unshift({ x: newX, y: newY });
 
+  // Check for Power Circle pickups
   if (checkCollision(newX + gridSize / 2, newY + gridSize / 2, powerCircles)) {
+    
+    const currentTime = performance.now();
+    const timeSinceLastPowerCircle = currentTime - lastPowerCircleTime;
+
+    if (timeSinceLastPowerCircle < 10000) {
+      consecutivePowerCircles++;
+    } else {
+      consecutivePowerCircles = 1;
+    }
+
+    const frequencyMultiplier = Math.pow(2, consecutivePowerCircles / 12);
+    playProceduralChiptune(frequencyMultiplier);
+
+    lastPowerCircleTime = currentTime;
+
     powerCircles = powerCircles.filter(circle => Math.abs(circle.x - (newX + gridSize / 2)) >= gridSize / 2 || Math.abs(circle.y - (newY + gridSize / 2)) >= gridSize / 2);
     gameSpeed *= speedIncreaseFactor;
     clearInterval(gameInterval);
@@ -139,19 +198,45 @@ if (
   }
 
   updatePowerCircles();
-  updateTrees();
   clearCanvas();
   drawPlayer();
   drawPowerCircles();
   drawTrees();
 }
 
+
+
+
+function playProceduralChiptune(frequencyMultiplier) {
+  const baseFrequency = 440; // Set the base frequency (pitch) of the sound
+  const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+  const audioContext = new AudioContextConstructor();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.type = 'sin'; // can be 'sin', 'square', 'triangle', or 'sawtooth'
+  oscillator.frequency.setValueAtTime(baseFrequency * frequencyMultiplier, audioContext.currentTime);
+
+  gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.5);
+}
+
+
+
+
+
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function movePlayer(e) {
-  if (gameOver) return;
+  if (isGameOver) return;
 
   if (e.key === 'ArrowUp' && dy === 0) {
     dx = 0;
@@ -175,9 +260,10 @@ function startGame() {
   dx = gridSize;
   dy = 0;
   powerCircles = [];
-  trees = [];
   gameSpeed = initialSpeed;
-  gameOver = false;
+  isGameOver = false;
+
+  trees = generateRandomTrees(numTrees);
 
   playAgainButton.style.display = 'none';
   clearInterval(gameInterval);
@@ -192,8 +278,39 @@ playAgainButton.addEventListener('keydown', (e) => {
   }
 });
 
-startGame();
 
+function gameOver() {
+  clearInterval(gameInterval);
+
+  // Display the "Game Over!" message
+  ctx.fillStyle = 'red';
+  ctx.font = '48px sans-serif';
+  ctx.fillText('Game Over!', canvas.width / 2 - 110, canvas.height / 2 - 50);
+
+  // Display the player's score (snake length)
+  ctx.fillStyle = 'black';
+  ctx.font = '24px sans-serif';
+  ctx.fillText(`Score: ${player.length}`, canvas.width / 2 - 45, canvas.height / 2);
+
+  // Display the "Play Again" message
+  ctx.fillStyle = 'blue';
+  ctx.font = '24px sans-serif';
+  ctx.fillText('Press Enter to Play Again', canvas.width / 2 - 125, canvas.height / 2 + 50);
+
+  // Listen for the Enter key to start a new game
+  document.addEventListener('keydown', function startGameListener(e) {
+    if (e.key === 'Enter') {
+      document.removeEventListener('keydown', startGameListener);
+      startGame(); // Corrected from initGame() to startGame()
+    }
+  });
+}
+
+
+
+
+startGame();
+setInterval(flashPowerCircles, flashInterval);
 
 
   </script>

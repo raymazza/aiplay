@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>ASCII Camera</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -18,6 +19,12 @@
   }
 
   /* ── Sidebar ── */
+  #sidebar-wrapper {
+    position: relative;
+    display: flex;
+    z-index: 10;
+  }
+
   #sidebar {
     width: 240px;
     min-width: 240px;
@@ -30,11 +37,44 @@
     gap: 2px;
     scrollbar-width: thin;
     scrollbar-color: #333 #111;
+    height: 100vh;
+    transition: margin-left 0.3s ease;
   }
+
+  #sidebar.collapsed {
+    margin-left: -240px;
+  }
+
+  #sidebar-toggle {
+    position: absolute;
+    right: -36px;
+    top: 10px;
+    width: 32px;
+    height: 32px;
+    background: #111;
+    border: 1px solid #333;
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    color: #888;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 11;
+    transition: right 0.3s ease;
+  }
+  #sidebar-toggle:hover { background: #222; color: #ccc; }
 
   #sidebar::-webkit-scrollbar { width: 6px; }
   #sidebar::-webkit-scrollbar-track { background: #111; }
   #sidebar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    #sidebar { margin-left: -240px; }
+    #sidebar.open { margin-left: 0 !important; }
+    #sidebar-toggle { top: 6px; }
+  }
 
   .section-title {
     font-size: 10px;
@@ -201,6 +241,8 @@
 </head>
 <body>
 
+<div id="sidebar-wrapper">
+<button id="sidebar-toggle">☰</button>
 <div id="sidebar">
   <!-- Camera -->
   <div class="section-title">Camera</div>
@@ -288,6 +330,7 @@
   <!-- Actions -->
   <div class="section-title">Actions</div>
   <button class="btn" id="freeze-btn" style="background:#333;color:#ccc;">Take Snapshot</button>
+</div>
 </div>
 
 <div id="main">
@@ -870,6 +913,30 @@ function applyCRT(w, h) {
   oCtx.drawImage(outCanvas, -1, -1, w + 2, h + 2);
   oCtx.globalAlpha = 1;
 }
+
+// ── Sidebar Toggle ──
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const isMobile = () => window.innerWidth <= 768;
+
+// Start collapsed on mobile
+if (isMobile()) {
+  sidebar.classList.add('collapsed');
+}
+
+sidebarToggle.addEventListener('click', () => {
+  if (isMobile()) {
+    sidebar.classList.toggle('open');
+    sidebar.classList.remove('collapsed');
+  } else {
+    sidebar.classList.toggle('collapsed');
+    sidebar.classList.remove('open');
+  }
+  // Re-fit after sidebar animation completes
+  if (running) {
+    setTimeout(autoFit, 350);
+  }
+});
 </script>
 </body>
 </html>

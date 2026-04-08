@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII Camera</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #ccc;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: #111;
+    border-right: 1px solid #222;
+    overflow-y: auto;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: #333 #111;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 6px; }
+  #sidebar::-webkit-scrollbar-track { background: #111; }
+  #sidebar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  .section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #555;
+    padding: 10px 14px 4px;
+    user-select: none;
+  }
+
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    padding: 5px 14px;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .ctrl-row label {
+    flex: 1;
+    color: #888;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ctrl-row input[type="range"] {
+    width: 80px;
+    accent-color: #00ff41;
+  }
+
+  .ctrl-row input[type="checkbox"] { accent-color: #00ff41; }
+  .ctrl-row input[type="color"] { width: 28px; height: 22px; border: 1px solid #333; background: none; cursor: pointer; }
+
+  .ctrl-row .val {
+    color: #555;
+    font-size: 11px;
+    min-width: 24px;
+    text-align: right;
+  }
+
+  .btn {
+    background: #00ff41;
+    color: #0a0a0a;
+    border: none;
+    padding: 7px 14px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 3px;
+    margin: 4px 14px;
+  }
+  .btn:hover { background: #00cc33; }
+
+  .btn-sm {
+    background: #222;
+    color: #aaa;
+    border: 1px solid #333;
+    padding: 4px 10px;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .btn-sm:hover { background: #333; }
+  .btn-sm.active { background: #00ff41; color: #0a0a0a; border-color: #00ff41; }
+
+  .btn-row {
+    display: flex;
+    gap: 4px;
+    padding: 4px 14px;
+    flex-wrap: wrap;
+  }
+
+  .preset-row {
+    display: flex;
+    gap: 4px;
+    padding: 4px 14px;
+  }
+  .preset-btn {
+    flex: 1;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #aaa;
+    padding: 5px 8px;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 3px;
+    text-align: center;
+  }
+  .preset-btn:hover { border-color: #555; }
+
+  /* ── Main area ── */
+  #main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #ascii-canvas {
+    image-rendering: pixelated;
+  }
+
+  #start-overlay {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  #start-overlay .start-hero-btn {
+    background: #00ff41;
+    color: #0a0a0a;
+    border: none;
+    padding: 16px 40px;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  #start-overlay .start-hero-btn:hover { background: #00cc33; }
+
+  #start-overlay .subtitle {
+    color: #444;
+    font-size: 13px;
+  }
+
+  #freeze-flash {
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  #toast {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #00ff41;
+    color: #0a0a0a;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  video, canvas.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <!-- Camera -->
+  <div class="section-title">Camera</div>
+  <button class="btn" id="start-btn">Start Camera</button>
+  <div class="ctrl-row">
+    <label>Resolution</label>
+    <input type="range" id="resolution" min="40" max="200" value="120">
+    <span class="val" id="res-val">120</span>
+  </div>
+  <div class="ctrl-row">
+    <label>Font Size</label>
+    <input type="range" id="font-size" min="4" max="20" value="10">
+    <span class="val" id="fs-val">10</span>
+  </div>
+  <div class="ctrl-row">
+    <label>FPS</label>
+    <input type="range" id="fps" min="1" max="60" value="30">
+    <span class="val" id="fps-val">30</span>
+  </div>
+  <div class="ctrl-row">
+    <label>Brightness</label>
+    <input type="range" id="brightness" min="-100" max="100" value="0">
+    <span class="val" id="br-val">0</span>
+  </div>
+
+  <!-- Color Mode -->
+  <div class="section-title">Color Mode</div>
+  <div class="btn-row">
+    <button class="btn-sm active" data-color="solid">Solid</button>
+    <button class="btn-sm" data-color="rainbow">Rainbow</button>
+    <button class="btn-sm" data-color="matrix">Matrix</button>
+  </div>
+  <div class="ctrl-row" id="solid-color-row">
+    <label>Color</label>
+    <input type="color" id="color-picker" value="#00ff41">
+  </div>
+
+  <!-- Character Set -->
+  <div class="section-title">Character Set</div>
+  <div class="btn-row">
+    <button class="btn-sm active" data-charset="ascii">ASCII</button>
+    <button class="btn-sm" data-charset="blocks">Blocks</button>
+    <button class="btn-sm" data-charset="halftone">Halftone</button>
+  </div>
+
+  <!-- Effects -->
+  <div class="section-title">Effects</div>
+  <div class="ctrl-row"><label><input type="checkbox" id="fx-invert"> Invert</label></div>
+  <div class="ctrl-row"><label><input type="checkbox" id="fx-negative"> Negative</label></div>
+  <div class="ctrl-row"><label><input type="checkbox" id="fx-solarize"> Solarize</label></div>
+  <div class="ctrl-row"><label><input type="checkbox" id="fx-edge"> Edge Detection</label></div>
+  <div class="ctrl-row"><label><input type="checkbox" id="fx-crt"> CRT Mode</label></div>
+
+  <!-- Transform -->
+  <div class="section-title">Transform</div>
+  <div class="btn-row">
+    <button class="btn-sm active" data-mirror="none">None</button>
+    <button class="btn-sm" data-mirror="h">H-Mirror</button>
+    <button class="btn-sm" data-mirror="v">V-Mirror</button>
+    <button class="btn-sm" data-mirror="both">Kaleidoscope</button>
+  </div>
+
+  <!-- Motion -->
+  <div class="section-title">Motion</div>
+  <div class="ctrl-row"><label><input type="checkbox" id="fx-motion"> Motion Only</label></div>
+  <div class="ctrl-row">
+    <label>Sensitivity</label>
+    <input type="range" id="motion-thresh" min="1" max="50" value="10">
+    <span class="val" id="mt-val">10</span>
+  </div>
+  <div class="ctrl-row"><label><input type="checkbox" id="fx-echo"> Echo / Ghost</label></div>
+  <div class="ctrl-row">
+    <label>Trail Length</label>
+    <input type="range" id="echo-len" min="2" max="12" value="5">
+    <span class="val" id="el-val">5</span>
+  </div>
+
+  <!-- Presets -->
+  <div class="section-title">Presets</div>
+  <div class="preset-row">
+    <button class="preset-btn" id="preset-green">Green Phosphor</button>
+    <button class="preset-btn" id="preset-amber">Amber Phosphor</button>
+  </div>
+
+  <!-- Actions -->
+  <div class="section-title">Actions</div>
+  <button class="btn" id="freeze-btn" style="background:#333;color:#ccc;">Take Snapshot</button>
+</div>
+
+<div id="main">
+  <div id="start-overlay">
+    <button class="start-hero-btn" id="start-hero-btn">Start Camera</button>
+    <div class="subtitle">ASCII Camera</div>
+  </div>
+  <canvas id="ascii-canvas"></canvas>
+  <div id="freeze-flash"></div>
+  <div id="toast"></div>
+</div>
+
+<video id="video" autoplay playsinline></video>
+<canvas id="sample-canvas" class="hidden"></canvas>
+<canvas id="crt-temp-canvas" class="hidden"></canvas>
+
+<script>
+// ── Elements ──
+const video = document.getElementById('video');
+const sampleCanvas = document.getElementById('sample-canvas');
+const sCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+const outCanvas = document.getElementById('ascii-canvas');
+const oCtx = outCanvas.getContext('2d');
+const crtTempCanvas = document.getElementById('crt-temp-canvas');
+const crtTempCtx = crtTempCanvas.getContext('2d');
+const mainEl = document.getElementById('main');
+const startOverlay = document.getElementById('start-overlay');
+const freezeFlash = document.getElementById('freeze-flash');
+const toastEl = document.getElementById('toast');
+
+// ── Character Ramps ──
+const ramps = {
+  ascii: ' .\'`^",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$',
+  blocks: ' ░▒▓█',
+  halftone: ' ·•●◉█'
+};
+
+const katakana = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+
+// ── State ──
+let running = false;
+let cols = 120;
+let fontSize = 10;
+let targetFPS = 30;
+let brightnessOffset = 0;
+let colorMode = 'solid';
+let charsetMode = 'ascii';
+let mirrorMode = 'none';
+let solidColor = '#00ff41';
+
+let fxInvert = false, fxNegative = false, fxSolarize = false;
+let fxEdge = false, fxCRT = false;
+let fxMotion = false, motionThresh = 0.1;
+let fxEcho = false, echoLen = 5;
+
+let prevBrightnessRaw = null; // raw (pre-motion) brightness for stable diffing
+let frameHistory = [];
+let matrixDrops = [];
+let matrixTrailBuffer = null; // persistent trail buffer for matrix
+let lastFrameTime = 0;
+let animTime = 0;
+
+// Text grid for snapshot
+let currentTextGrid = '';
+
+// ── Auto-fit to fill screen ──
+function autoFit() {
+  const vw = video.videoWidth || 640;
+  const vh = video.videoHeight || 480;
+  const videoAspect = vw / vh;
+  const charAspect = 0.5; // characters are ~twice as tall as wide
+  const cellRatio = 0.62; // cellW = fontSize * cellRatio
+
+  // Available space in the main area with some margin
+  const margin = 40; // px margin on each side
+  const availW = mainEl.clientWidth - margin * 2;
+  const availH = mainEl.clientHeight - margin * 2;
+
+  // Try a range of font sizes and pick the one that fills the space best
+  let bestFontSize = fontSize;
+  let bestCols = cols;
+  let bestFill = 0;
+
+  for (let fs = 4; fs <= 20; fs++) {
+    const cellW = fs * cellRatio;
+    const cellH = fs;
+
+    // Max cols that fit horizontally
+    const maxCols = Math.floor(availW / cellW);
+    // Corresponding rows from video aspect ratio
+    const numRows = Math.floor((maxCols * (vh / vw)) * charAspect);
+    // Check if rows fit vertically
+    const usedH = numRows * cellH;
+    const usedW = maxCols * cellW;
+
+    let fitCols = maxCols;
+    let fitRows = numRows;
+
+    if (usedH > availH) {
+      // Constrained by height — reduce cols
+      fitRows = Math.floor(availH / cellH);
+      fitCols = Math.floor(fitRows / charAspect * (vw / vh));
+    }
+
+    const fillW = fitCols * cellW;
+    const fillH = (Math.floor((fitCols * (vh / vw)) * charAspect)) * cellH;
+    const fillArea = Math.min(fillW, availW) * Math.min(fillH, availH);
+
+    if (fillArea > bestFill && fitCols >= 40 && fitCols <= 200) {
+      bestFill = fillArea;
+      bestFontSize = fs;
+      bestCols = Math.min(200, Math.max(40, fitCols));
+    }
+  }
+
+  fontSize = bestFontSize;
+  cols = bestCols;
+
+  // Sync sliders
+  const fsSlider = document.getElementById('font-size');
+  const resSlider = document.getElementById('resolution');
+  fsSlider.value = fontSize;
+  document.getElementById('fs-val').textContent = fontSize;
+  resSlider.value = cols;
+  document.getElementById('res-val').textContent = cols;
+}
+
+// ── Wiring Controls ──
+function wireSlider(id, valId, setter) {
+  const sl = document.getElementById(id);
+  const vl = document.getElementById(valId);
+  sl.addEventListener('input', () => { vl.textContent = sl.value; setter(Number(sl.value)); });
+}
+wireSlider('resolution', 'res-val', v => cols = v);
+wireSlider('font-size', 'fs-val', v => fontSize = v);
+wireSlider('fps', 'fps-val', v => targetFPS = v);
+wireSlider('brightness', 'br-val', v => brightnessOffset = v / 100);
+wireSlider('motion-thresh', 'mt-val', v => motionThresh = v / 100);
+wireSlider('echo-len', 'el-val', v => echoLen = v);
+
+document.getElementById('color-picker').addEventListener('input', e => solidColor = e.target.value);
+
+// Toggle groups (mutually exclusive buttons)
+function wireToggleGroup(attr, setter) {
+  document.querySelectorAll(`[data-${attr}]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll(`[data-${attr}]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      setter(btn.dataset[attr]);
+    });
+  });
+}
+wireToggleGroup('color', v => { colorMode = v; matrixDrops = []; matrixTrailBuffer = null; });
+wireToggleGroup('charset', v => { charsetMode = v; });
+wireToggleGroup('mirror', v => { mirrorMode = v; });
+
+// Checkboxes
+function wireCheck(id, setter) {
+  document.getElementById(id).addEventListener('change', e => setter(e.target.checked));
+}
+wireCheck('fx-invert', v => fxInvert = v);
+wireCheck('fx-negative', v => fxNegative = v);
+wireCheck('fx-solarize', v => fxSolarize = v);
+wireCheck('fx-edge', v => fxEdge = v);
+wireCheck('fx-crt', v => fxCRT = v);
+wireCheck('fx-motion', v => { fxMotion = v; prevBrightnessRaw = null; });
+wireCheck('fx-echo', v => { fxEcho = v; frameHistory = []; });
+
+// Presets
+document.getElementById('preset-green').addEventListener('click', () => {
+  solidColor = '#00ff41';
+  document.getElementById('color-picker').value = '#00ff41';
+  setColorMode('solid');
+  document.getElementById('fx-crt').checked = true; fxCRT = true;
+});
+document.getElementById('preset-amber').addEventListener('click', () => {
+  solidColor = '#ffb000';
+  document.getElementById('color-picker').value = '#ffb000';
+  setColorMode('solid');
+  document.getElementById('fx-crt').checked = true; fxCRT = true;
+});
+
+function setColorMode(mode) {
+  colorMode = mode;
+  document.querySelectorAll('[data-color]').forEach(b => b.classList.toggle('active', b.dataset.color === mode));
+}
+
+// Start / Stop (both sidebar button and hero button)
+async function startCamera() {
+  const btn = document.getElementById('start-btn');
+  if (running) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+    running = false;
+    btn.textContent = 'Start Camera';
+    startOverlay.style.display = '';
+    outCanvas.style.display = 'none';
+    return;
+  }
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Camera API not available. Open this file directly in your browser.');
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+    });
+    video.srcObject = stream;
+    await video.play();
+    autoFit();
+    running = true;
+    btn.textContent = 'Stop Camera';
+    startOverlay.style.display = 'none';
+    outCanvas.style.display = '';
+    prevBrightnessRaw = null;
+    frameHistory = [];
+    matrixDrops = [];
+    matrixTrailBuffer = null;
+    lastFrameTime = 0;
+    requestAnimationFrame(renderLoop);
+  } catch (err) {
+    startOverlay.querySelector('.subtitle').textContent = 'Error: ' + err.message;
+  }
+}
+
+document.getElementById('start-btn').addEventListener('click', startCamera);
+document.getElementById('start-hero-btn').addEventListener('click', startCamera);
+
+// Take Snapshot
+document.getElementById('freeze-btn').addEventListener('click', () => {
+  if (!currentTextGrid) return;
+  navigator.clipboard.writeText(currentTextGrid).then(() => {
+    freezeFlash.style.opacity = '0.6';
+    setTimeout(() => freezeFlash.style.opacity = '0', 150);
+    showToast('Copied to clipboard!');
+  }).catch(() => showToast('Copy failed'));
+});
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.style.opacity = '1';
+  setTimeout(() => toastEl.style.opacity = '0', 1500);
+}
+
+// ── Render Loop ──
+function renderLoop(timestamp) {
+  if (!running) return;
+  requestAnimationFrame(renderLoop);
+
+  // FPS throttle
+  const frameInterval = 1000 / targetFPS;
+  if (timestamp - lastFrameTime < frameInterval) return;
+  lastFrameTime = timestamp;
+  animTime += frameInterval / 1000;
+
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+  if (vw === 0 || vh === 0) return;
+
+  // Compute grid dimensions
+  const charAspect = 0.5;
+  const numCols = cols;
+  const numRows = Math.floor((numCols * (vh / vw)) * charAspect);
+
+  // Sample video to small canvas
+  sampleCanvas.width = numCols;
+  sampleCanvas.height = numRows;
+  sCtx.drawImage(video, 0, 0, numCols, numRows);
+  const imageData = sCtx.getImageData(0, 0, numCols, numRows);
+  const pixels = imageData.data;
+
+  // Build brightness grid
+  let grid = new Float32Array(numCols * numRows);
+  for (let i = 0; i < grid.length; i++) {
+    const pi = i * 4;
+    grid[i] = (0.299 * pixels[pi] + 0.587 * pixels[pi + 1] + 0.114 * pixels[pi + 2]) / 255;
+  }
+
+  // Save raw brightness BEFORE any effects (for stable motion diffing)
+  const rawGrid = new Float32Array(grid);
+
+  // ── Apply transforms and effects to brightness grid ──
+
+  // Brightness offset
+  if (brightnessOffset !== 0) {
+    for (let i = 0; i < grid.length; i++) {
+      grid[i] = Math.max(0, Math.min(1, grid[i] + brightnessOffset));
+    }
+  }
+
+  // Negative
+  if (fxNegative) {
+    for (let i = 0; i < grid.length; i++) grid[i] = 1 - grid[i];
+  }
+
+  // Solarize
+  if (fxSolarize) {
+    for (let i = 0; i < grid.length; i++) {
+      if (grid[i] > 0.5) grid[i] = 1 - grid[i];
+      grid[i] *= 2;
+    }
+  }
+
+  // Mirror
+  if (mirrorMode === 'h' || mirrorMode === 'both') {
+    for (let y = 0; y < numRows; y++) {
+      for (let x = 0; x < Math.floor(numCols / 2); x++) {
+        grid[y * numCols + (numCols - 1 - x)] = grid[y * numCols + x];
+      }
+    }
+  }
+  if (mirrorMode === 'v' || mirrorMode === 'both') {
+    for (let y = 0; y < Math.floor(numRows / 2); y++) {
+      for (let x = 0; x < numCols; x++) {
+        grid[(numRows - 1 - y) * numCols + x] = grid[y * numCols + x];
+      }
+    }
+  }
+
+  // Echo / Ghost
+  if (fxEcho) {
+    frameHistory.push(new Float32Array(grid));
+    if (frameHistory.length > echoLen) frameHistory.shift();
+    if (frameHistory.length > 1) {
+      const blended = new Float32Array(grid.length);
+      let totalWeight = 0;
+      for (let f = 0; f < frameHistory.length; f++) {
+        const weight = (f + 1) / frameHistory.length;
+        totalWeight += weight;
+        for (let i = 0; i < grid.length; i++) {
+          blended[i] += frameHistory[f][i] * weight;
+        }
+      }
+      for (let i = 0; i < grid.length; i++) blended[i] /= totalWeight;
+      grid = blended;
+    }
+  }
+
+  // Edge Detection (Sobel)
+  if (fxEdge) {
+    const edges = new Float32Array(grid.length);
+    for (let y = 1; y < numRows - 1; y++) {
+      for (let x = 1; x < numCols - 1; x++) {
+        const tl = grid[(y-1)*numCols+(x-1)], tc = grid[(y-1)*numCols+x], tr = grid[(y-1)*numCols+(x+1)];
+        const ml = grid[y*numCols+(x-1)],                                  mr = grid[y*numCols+(x+1)];
+        const bl = grid[(y+1)*numCols+(x-1)], bc = grid[(y+1)*numCols+x], br = grid[(y+1)*numCols+(x+1)];
+        const gx = -tl - 2*ml - bl + tr + 2*mr + br;
+        const gy = -tl - 2*tc - tr + bl + 2*bc + br;
+        edges[y * numCols + x] = Math.min(1, Math.sqrt(gx*gx + gy*gy));
+      }
+    }
+    grid = edges;
+  }
+
+  // Motion detection — compare against RAW previous frame (not filtered)
+  if (fxMotion) {
+    if (prevBrightnessRaw && prevBrightnessRaw.length === rawGrid.length) {
+      for (let i = 0; i < grid.length; i++) {
+        const delta = Math.abs(rawGrid[i] - prevBrightnessRaw[i]);
+        grid[i] = delta >= motionThresh ? grid[i] : 0;
+      }
+    }
+    prevBrightnessRaw = rawGrid;
+  }
+
+  // Invert (ramp direction)
+  const invertRamp = fxInvert;
+
+  // ── Setup output canvas ──
+  const cellW = fontSize * 0.62;
+  const cellH = fontSize;
+  const canvasW = Math.ceil(numCols * cellW);
+  const canvasH = Math.ceil(numRows * cellH);
+
+  outCanvas.width = canvasW;
+  outCanvas.height = canvasH;
+
+  // Background color depends on mode
+  if (colorMode === 'rainbow') {
+    oCtx.fillStyle = '#ffffff';
+  } else {
+    oCtx.fillStyle = '#0a0a0a';
+  }
+  oCtx.fillRect(0, 0, canvasW, canvasH);
+  oCtx.font = fontSize + 'px "Courier New", monospace';
+  oCtx.textBaseline = 'top';
+
+  // ── Render characters ──
+  const ramp = ramps[charsetMode] || ramps.ascii;
+  const rampLen = ramp.length;
+  let textLines = [];
+
+  for (let y = 0; y < numRows; y++) {
+    let lineText = '';
+    for (let x = 0; x < numCols; x++) {
+      let b = grid[y * numCols + x];
+      let charIdx;
+      if (invertRamp) {
+        charIdx = Math.floor((1 - b) * (rampLen - 1));
+      } else {
+        charIdx = Math.floor(b * (rampLen - 1));
+      }
+      charIdx = Math.max(0, Math.min(rampLen - 1, charIdx));
+      const ch = ramp[charIdx];
+
+      // Determine color
+      let color;
+      if (colorMode === 'rainbow') {
+        const hue = ((x / numCols + y / numRows) * 360 + animTime * 60) % 360;
+        const lightness = Math.floor(10 + b * 40);
+        color = `hsl(${hue},100%,${lightness}%)`;
+      } else {
+        color = solidColor;
+      }
+
+      oCtx.fillStyle = color;
+      oCtx.fillText(ch, x * cellW, y * cellH);
+      lineText += ch;
+    }
+    textLines.push(lineText);
+  }
+  currentTextGrid = textLines.join('\n');
+
+  // ── Matrix overlay ──
+  if (colorMode === 'matrix') {
+    renderMatrixOverlay(grid, numCols, numRows, cellW, cellH, canvasW, canvasH);
+  }
+
+  // ── CRT Post-Processing ──
+  if (fxCRT) {
+    applyCRT(canvasW, canvasH);
+  }
+}
+
+// ── Matrix Rain (overlay on top of ASCII) ──
+function renderMatrixOverlay(grid, numCols, numRows, cellW, cellH, canvasW, canvasH) {
+  // Initialize drops
+  if (matrixDrops.length !== numCols) {
+    matrixDrops = [];
+    for (let x = 0; x < numCols; x++) {
+      matrixDrops.push({
+        y: Math.random() * numRows,
+        speed: 0.3 + Math.random() * 0.8,
+        length: 5 + Math.floor(Math.random() * 15)
+      });
+    }
+  }
+
+  // Initialize trail buffer (stores brightness of trails per cell)
+  if (!matrixTrailBuffer || matrixTrailBuffer.length !== numCols * numRows) {
+    matrixTrailBuffer = new Float32Array(numCols * numRows);
+  }
+
+  // Fade existing trails
+  for (let i = 0; i < matrixTrailBuffer.length; i++) {
+    matrixTrailBuffer[i] *= 0.92;
+  }
+
+  const chars = katakana + '0123456789ABCDEF';
+
+  // Update drops and paint trails
+  for (let x = 0; x < numCols; x++) {
+    const drop = matrixDrops[x];
+    drop.y += drop.speed;
+    if (drop.y - drop.length > numRows) {
+      drop.y = -Math.floor(Math.random() * numRows * 0.5);
+      drop.speed = 0.3 + Math.random() * 0.8;
+      drop.length = 5 + Math.floor(Math.random() * 15);
+    }
+
+    // Write head and trail into buffer
+    for (let dy = 0; dy < drop.length; dy++) {
+      const iy = Math.floor(drop.y - dy);
+      if (iy >= 0 && iy < numRows) {
+        const intensity = 1 - (dy / drop.length);
+        const idx = iy * numCols + x;
+        // Modulate by webcam brightness
+        const b = grid[idx];
+        const val = intensity * (0.4 + b * 0.6);
+        if (val > matrixTrailBuffer[idx]) {
+          matrixTrailBuffer[idx] = val;
+        }
+      }
+    }
+  }
+
+  // Draw the matrix overlay
+  for (let y = 0; y < numRows; y++) {
+    for (let x = 0; x < numCols; x++) {
+      const idx = y * numCols + x;
+      const trail = matrixTrailBuffer[idx];
+      if (trail > 0.03) {
+        const ch = chars[Math.floor(Math.random() * chars.length)];
+        const green = Math.floor(60 + trail * 195);
+
+        // Head of drop = bright white-green
+        let isHead = false;
+        const drop = matrixDrops[x];
+        if (Math.abs(y - Math.floor(drop.y)) < 1) isHead = true;
+
+        oCtx.fillStyle = isHead
+          ? `rgba(180,255,180,${Math.min(1, trail * 1.5)})`
+          : `rgba(0,${green},0,${Math.min(1, trail * 1.2)})`;
+        oCtx.fillText(ch, x * cellW, y * cellH);
+      }
+    }
+  }
+}
+
+// ── CRT Effect with Barrel Distortion ──
+function applyCRT(w, h) {
+  // Copy current canvas to temp
+  crtTempCanvas.width = w;
+  crtTempCanvas.height = h;
+  crtTempCtx.drawImage(outCanvas, 0, 0);
+
+  // Clear and fill with black
+  oCtx.fillStyle = '#0a0a0a';
+  oCtx.fillRect(0, 0, w, h);
+
+  // Barrel distortion: draw horizontal strips with varying width
+  const numStrips = Math.max(20, Math.floor(h / 4));
+  const stripH = h / numStrips;
+  const strength = 0.15; // distortion strength
+
+  for (let i = 0; i < numStrips; i++) {
+    const sy = i * stripH;
+    // Normalized position from center (-1 to 1)
+    const ny = (i / numStrips) * 2 - 1;
+
+    for (let pass = 0; pass < 1; pass++) {
+      // For each strip, calculate barrel distortion offset
+      const distortionY = ny * ny * strength;
+      const distortionScaleX = 1 - distortionY;
+
+      // Also apply horizontal barrel per-strip
+      const newW = w * distortionScaleX;
+      const offsetX = (w - newW) / 2;
+
+      // Vertical squeeze toward edges
+      const distortionScaleY = 1 - (ny * ny * strength * 0.5);
+      const newStripH = stripH * distortionScaleY;
+      const srcY = sy;
+      const dstY = h / 2 + (sy - h / 2) * (1 - ny * ny * strength * 0.3);
+
+      oCtx.drawImage(crtTempCanvas,
+        0, srcY, w, stripH,           // source
+        offsetX, dstY, newW, newStripH // dest (squeezed)
+      );
+    }
+  }
+
+  // Scanlines
+  oCtx.fillStyle = 'rgba(0,0,0,0.25)';
+  for (let y = 0; y < h; y += 3) {
+    oCtx.fillRect(0, y, w, 1);
+  }
+
+  // Vignette (stronger at edges for tube feel)
+  const grad = oCtx.createRadialGradient(w/2, h/2, w*0.25, w/2, h/2, w*0.75);
+  grad.addColorStop(0, 'rgba(0,0,0,0)');
+  grad.addColorStop(0.7, 'rgba(0,0,0,0.15)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.7)');
+  oCtx.fillStyle = grad;
+  oCtx.fillRect(0, 0, w, h);
+
+  // Flicker
+  oCtx.fillStyle = `rgba(0,0,0,${Math.random() * 0.04})`;
+  oCtx.fillRect(0, 0, w, h);
+
+  // Phosphor glow (bloom)
+  oCtx.globalAlpha = 0.07;
+  oCtx.drawImage(outCanvas, -1, -1, w + 2, h + 2);
+  oCtx.globalAlpha = 1;
+}
+</script>
+</body>
+</html>

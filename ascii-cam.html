@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -506,7 +507,12 @@ async function startCamera() {
     lastFrameTime = 0;
     requestAnimationFrame(renderLoop);
   } catch (err) {
-    startOverlay.querySelector('.subtitle').textContent = 'Error: ' + err.message;
+    let msg = err.message;
+    if (err.name === 'NotAllowedError' || /denied|permission/i.test(msg)) {
+      msg = 'Camera permission denied. If this is embedded in an iframe, the iframe needs allow="camera" permission.';
+    }
+    startOverlay.querySelector('.subtitle').textContent = msg;
+    startOverlay.querySelector('.subtitle').style.color = '#ff4444';
   }
 }
 
@@ -549,10 +555,14 @@ function renderLoop(timestamp) {
   const numCols = cols;
   const numRows = Math.floor((numCols * (vh / vw)) * charAspect);
 
-  // Sample video to small canvas
+  // Sample video to small canvas (mirrored horizontally for selfie view)
   sampleCanvas.width = numCols;
   sampleCanvas.height = numRows;
+  sCtx.save();
+  sCtx.translate(numCols, 0);
+  sCtx.scale(-1, 1);
   sCtx.drawImage(video, 0, 0, numCols, numRows);
+  sCtx.restore();
   const imageData = sCtx.getImageData(0, 0, numCols, numRows);
   const pixels = imageData.data;
 

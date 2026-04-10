@@ -3378,13 +3378,34 @@ const PopupDialogs = {
 
   _create(title, width) {
     const id = 'hpop-' + (this._nextId++);
-    const pos = this._pos();
     const el = document.createElement('div');
     el.className = 'hacker-popup';
     el.id = id;
-    el.style.left = pos.x + 'px';
-    el.style.top = pos.y + 'px';
-    if (width) el.style.width = width + 'px';
+
+    const vw = window.innerWidth, vh = window.innerHeight;
+    if (vw < 768) {
+      // Mobile: center horizontally, size 60–95% of viewport, place in top half.
+      const pct = 60 + Math.random() * 35; // 60..95
+      const mw = Math.floor(vw * pct / 100);
+      const left = Math.floor((vw - mw) / 2);
+      // Approximate popup height for clamping so it doesn't overflow bottom.
+      const approxH = 340;
+      const maxTopDesired = Math.floor(vh * 0.5);
+      const maxTopFits = Math.max(10, vh - approxH - 10);
+      const maxTop = Math.max(10, Math.min(maxTopDesired, maxTopFits));
+      const top = maxTop > 10 ? ri(10, maxTop) : 10;
+      el.style.width = mw + 'px';
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+      // Also cap max-height so tall popups don't run off the bottom.
+      el.style.maxHeight = Math.floor(vh * 0.7) + 'px';
+    } else {
+      const pos = this._pos();
+      el.style.left = pos.x + 'px';
+      el.style.top = pos.y + 'px';
+      if (width) el.style.width = width + 'px';
+    }
+
     el.innerHTML = '<div class="hacker-popup-titlebar"><span>' + title + '</span><button class="hacker-popup-close" onclick="PopupDialogs.close(\'' + id + '\')">X</button></div><div class="hacker-popup-content"></div>';
     document.body.appendChild(el);
     const rec = { id, el, intervals: [], timeouts: [] };

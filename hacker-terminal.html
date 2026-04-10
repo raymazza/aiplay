@@ -2552,7 +2552,7 @@ const JailbreakGame = {
     // Generate maze
     this._generateMaze();
     this.player = { x: 0, y: 0 };
-    this.police = { x: this.cols - 1, y: this.rows - 1 };
+    this.police = { x: this.cols - 1, y: this.rows - 1, dir: null };
     this.exit = { x: this.cols - 1, y: this.rows - 1 };
 
     // Input handler
@@ -2627,6 +2627,31 @@ const JailbreakGame = {
         stack.pop();
       }
     }
+
+    // Extra connectivity: remove 3–10 random interior walls so there are more
+    // loops/tunnels than a pure perfect maze allows.
+    const numToRemove = ri(3, 10);
+    let removed = 0;
+    let attempts = 0;
+    while (removed < numToRemove && attempts < 400) {
+      attempts++;
+      const x = ri(0, this.cols - 1);
+      const y = ri(0, this.rows - 1);
+      // 50/50: try removing the right wall or the bottom wall of this cell.
+      if (Math.random() < 0.5) {
+        if (x + 1 < this.cols && this.maze[y][x].right) {
+          this.maze[y][x].right = false;
+          this.maze[y][x + 1].left = false;
+          removed++;
+        }
+      } else {
+        if (y + 1 < this.rows && this.maze[y][x].bottom) {
+          this.maze[y][x].bottom = false;
+          this.maze[y + 1][x].top = false;
+          removed++;
+        }
+      }
+    }
   },
 
   _movePlayer(dx, dy) {
@@ -2650,10 +2675,11 @@ const JailbreakGame = {
   _hasLineOfSight() {
     const px = this.police.x, py = this.police.y;
     const hx = this.player.x, hy = this.player.y;
+    const maxRange = 4; // cells — LOS acts like a flashlight, not omniscience
     // Same row — check horizontal corridor
     if (py === hy) {
+      if (Math.abs(px - hx) > maxRange) return false;
       const minX = Math.min(px, hx), maxX = Math.max(px, hx);
-      const dir = px < hx ? 'right' : 'left';
       for (let x = minX; x < maxX; x++) {
         if (this.maze[py][x].right) return false; // wall blocks
       }
@@ -2661,6 +2687,7 @@ const JailbreakGame = {
     }
     // Same column — check vertical corridor
     if (px === hx) {
+      if (Math.abs(py - hy) > maxRange) return false;
       const minY = Math.min(py, hy), maxY = Math.max(py, hy);
       for (let y = minY; y < maxY; y++) {
         if (this.maze[y][px].bottom) return false;
@@ -2730,16 +2757,46 @@ const JailbreakGame = {
   _movePolice() {
     let next;
     if (this._hasLineOfSight()) {
-      // Line of sight: always pursue
-      next = this._bfsStep();
-    } else if (Math.random() < 0.5) {
-      // 50%: pursue via BFS
+      // Line of sight: pursue toward the player.
       next = this._bfsStep();
     } else {
-      // 50%: wander randomly
-      next = this._randomStep();
+      // Patrol: prefer continuing forward; at junctions pick a random path.
+      const dirs = [
+        { dx: 0, dy: -1, wall: 'top' },
+        { dx: 1, dy: 0, wall: 'right' },
+        { dx: 0, dy: 1, wall: 'bottom' },
+        { dx: -1, dy: 0, wall: 'left' }
+      ];
+      const cell = this.maze[this.police.y][this.police.x];
+      const open = [];
+      for (const d of dirs) {
+        const nx = this.police.x + d.dx, ny = this.police.y + d.dy;
+        if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows && !cell[d.wall]) {
+          open.push({ x: nx, y: ny, wall: d.wall });
+        }
+      }
+      if (open.length === 0) {
+        next = null;
+      } else if (open.length >= 3) {
+        // Junction: pick a random path.
+        next = open[ri(0, open.length - 1)];
+      } else {
+        // Corridor or corner: 90% forward if possible, 10% random.
+        const forward = this.police.dir ? open.find(o => o.wall === this.police.dir) : null;
+        if (forward && Math.random() < 0.9) {
+          next = forward;
+        } else {
+          next = open[ri(0, open.length - 1)];
+        }
+      }
     }
     if (next) {
+      // Track heading so "forward" means something next tick.
+      const dx = next.x - this.police.x, dy = next.y - this.police.y;
+      if (dy === -1) this.police.dir = 'top';
+      else if (dx === 1) this.police.dir = 'right';
+      else if (dy === 1) this.police.dir = 'bottom';
+      else if (dx === -1) this.police.dir = 'left';
       this.police.x = next.x;
       this.police.y = next.y;
     }
@@ -3832,6 +3889,36 @@ function handleKey(e) {
   }
 }
 
+function handleTap(e) {
+  // Let taps on real UI controls behave normally (settings buttons, slider,
+  // popup/modal content, satellite mini-game canvas, links, form elements).
+  if (e.target.closest('button, input, select, textarea, a, canvas, #settings-modal, #terminal-popup')) {
+    return;
+  }
+
+  // Suppress double-tap zoom, text selection, and the synthetic click.
+  e.preventDefault();
+
+  // Skip advancing while game/overlay modes own the input.
+  if (state.jailbreakActive) return;
+  if (state.terminalOpen) return;
+  if (state.settingsOpen) return;
+  if (state.prankMode) return;
+
+  // Dismiss the initial fullscreen prompt (mirrors handleKey).
+  if (dom.fsPrompt && !dom.fsPrompt.classList.contains('fade')) {
+    dom.fsPrompt.classList.add('fade');
+    setTimeout(() => { if (dom.fsPrompt) dom.fsPrompt.remove(); dom.fsPrompt = null; }, 1000);
+  }
+
+  // Unlock audio on first user gesture (mobile requirement).
+  AudioEngine.init();
+
+  // Advance the typer — same primitives as the keydown default branch.
+  TypingEngine.type();
+  TypingTrail.emit();
+}
+
 let frameCount = 0;
 function animLoop() {
   MatrixRain.draw(); Radar.draw(); Particles.draw();
@@ -3949,6 +4036,7 @@ function init() {
   setInterval(updateClock, 50); updateClock();
 
   document.addEventListener('keydown', handleKey);
+  document.addEventListener('touchstart', handleTap, { passive: false });
 
   document.getElementById('btn-sound').addEventListener('click', function() { state.soundEnabled = !state.soundEnabled; this.textContent = state.soundEnabled ? 'ON':'OFF'; this.classList.toggle('active', state.soundEnabled); });
   document.getElementById('btn-crt').addEventListener('click', function() { state.crtEnabled = !state.crtEnabled; document.getElementById('crt-overlay').classList.toggle('disabled', !state.crtEnabled); this.textContent = state.crtEnabled ? 'ON':'OFF'; this.classList.toggle('active', state.crtEnabled); });
